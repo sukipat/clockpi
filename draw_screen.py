@@ -200,7 +200,7 @@ def _measure_quote_layout(quote, fonts, max_width):
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
-    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3) - 5
     PADDING_X = 50
     PADDING_TOP = 50
     max_width = SCREEN_WIDTH - 2 * PADDING_X
@@ -290,11 +290,11 @@ def draw_time(draw, timestr):
 def draw_startup_status(draw, wifi_status):
     startup_text = "Starting Up..."
     [startup_width, startup_height] = text_size(startup_text,courierbold50)
-    draw.text((400 - (startup_width/2),100), startup_text, font = courierbold50, fill = 0)
+    draw.text((400 - (startup_width/2),120), startup_text, font = courierbold50, fill = 0)
 
     status_text = "Wifi Connected!"
     if not wifi_status:
         status_text = "Connecting Wifi"
     
     [status_width, status_height] = text_size(status_text, courierbold35)
-    draw.text((400 - (status_width/2),300),status_text, font = courierbold35, fill = 0)
+    draw.text((400 - (status_width/2),320),status_text, font = courierbold35, fill = 0)
