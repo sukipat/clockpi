@@ -142,7 +142,7 @@ def draw_trains(draw):
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
         [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((400 - (error_width/2),line_y),error_msg,font = helvetica18, fill = 0)
+        draw.text((480 - (error_width/2),line_y),error_msg,font = helvetica18, fill = 0)
 
     # draw.line((0,line_y,800,line_y), fill=0)
 
@@ -293,57 +293,47 @@ def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
-def partial_train_update():
-    logging.info("Connecting for Partial Update")
-    epd = epd7in5_V2.EPD()
 
-    epd.init_part()
-    PartialImage = Image.new('1', (epd.width, epd.height), 0)
-    draw = ImageDraw.Draw(PartialImage)
-
-    draw_trains(draw)
-    
-    logging.info("Attempting Partial Update")
-    epd.display_Partial(epd.getbuffer(PartialImage),0,320,epd.width,epd.height)
-
-    # logging.info("Goto Sleep...")
-    # epd.sleep()
-    
-
-def full_screen_update():
-    logging.info("Connecting for Full Update")
-    epd = epd7in5_V2.EPD()
-    
-    epd.init_fast()
-    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
-    draw = ImageDraw.Draw(image_to_draw)
-
+def full_screen_update(draw):
     timestr = time.strftime("%I:%M %p")
     quote = get_current_time_quote()
     draw_time(draw, timestr)
     draw_quote(draw, quote)
     draw_trains(draw)
 
-    logging.info("Attempting Full Screen Update")
-    epd.display(epd.getbuffer(image_to_draw))
-
-    logging.info("Goto Sleep...")
-    epd.sleep()
-
 try:
-    logging.info("Connecting for Full Update")
+    logging.info("Connecting to display")
     epd = epd7in5_V2.EPD()
     
     epd.init()
-    epd.Clear()
+    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    draw = ImageDraw.Draw(image_to_draw)
+
+    logging.info("Initial Draw")
+    full_screen_update(draw)
+    epd.display(epd.getbuffer(image_to_draw))
+
+    logging.info("Sleeping")
     epd.sleep()
-
-    full_screen_update()
     time.sleep(10)
-    # partial_train_update()
-    # time.sleep(10)
-    full_screen_update()
 
+    logging.info("Partial Draw")
+    epd.init_part()
+    draw_trains(draw)
+    epd.display_Partial(epd.getbuffer(image_to_draw),0,320,epd.width,epd.height)
+
+    logging.info("Sleeping")
+    epd.sleep()
+    time.sleep(10)
+
+    logging.info("Second full draw")
+    epd.init()
+    HImage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    Hdraw = ImageDraw.Draw(HImage)
+    full_screen_update(Hdraw)
+    epd.display(epd.getbuffer(HImage))
+
+    epd.sleep()
     # partial update
 #     logging.info("5.show time")
 #     epd.init_part()
