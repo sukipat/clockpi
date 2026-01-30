@@ -1,10 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # scheduler.py
 from concurrent.futures import thread
 import time
 import asyncio
 import signal
 import threading
+import requests
 
 from waveshare_epd import epd7in5_V2
 from PIL import Image,ImageDraw,ImageFont
@@ -12,7 +13,9 @@ from PIL import Image,ImageDraw,ImageFont
 from draw_screen import draw_time
 from draw_screen import draw_quote
 from draw_screen import draw_trains
-from draw_screen import get_current_time_quote
+from draw_screen import draw_startup_status
+
+from literature_clock import get_current_time_quote
 
 epd = epd7in5_V2.EPD()
 existing_image = None
@@ -176,11 +179,50 @@ async def scheduler():
         print("Scheduler stopped cleanly.")
 
 
+def prepare():
+    wifi_connected = False
+    cycle_count = 0
+    
+    try:
+        epd.init()
+        screen_image = Image.new('1',(epd.width, epd.height),255)
+        draw = ImageDraw.Draw(screen_image)
+
+        draw_startup_status(draw,wifi_connected)
+
+        epd.display(epd.getbuffer(screen_image))
+        epd.sleep()
+
+        while(cycle_count < 5):
+            try:
+                response = requests.get("https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace", timeout=12)
+            except requests.exceptions.Timeout:
+                cycle_count += 1
+            except requests.exceptions.ConnectionError:
+                cycle_count += 1
+            else:
+                wifi_connected = True
+
+                epd.init_part()
+                draw.rectangle((0,0,epd.width,epd.height),fill = 255)
+                draw_startup_status(draw,wifi_connected)
+
+                epd.display_Partial(screen_image,0,0,epd.width,epd.height)
+                epd.sleep()
+                time.sleep(2)
+                break
+    except IOError as e:
+        logging.info(e)
+    except KeyboardInterrupt:    
+        logging.info("ctrl + c:")
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
+        exit()
+
 
 async def main():
     install_signal_handlers()
     await scheduler()
 
-
 if __name__ == "__main__":
+    prepare()
     asyncio.run(main())

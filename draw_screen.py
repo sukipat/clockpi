@@ -8,7 +8,6 @@ import time
 from PIL import Image,ImageDraw,ImageFont
 
 from train_status import get_arriving_trains
-from literature_clock import get_current_time_quote
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -23,6 +22,7 @@ courier24 = ImageFont.truetype("resources/Courier New.ttf", 24)
 courier31 = ImageFont.truetype("resources/Courier New.ttf", 31)
 
 courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
+courierbold50 = ImageFont.truetype("resources/Courier New Bold.ttf",50)
 
 # Font paths for dynamic sizing
 COURIER_PATH = "resources/Courier New.ttf"
@@ -117,7 +117,7 @@ def draw_trains(draw):
                 add_train(draw,uptownX,train2_y,route,mins,radius)
 
     if not downtown_trains:
-        draw.text((downtownX - nd_h,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
+        draw.text((downtownX - nd_w,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
     else:
         draw.text((downtownX - 30, train1_y - radius - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
 
@@ -136,7 +136,7 @@ def draw_trains(draw):
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
         [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((480 - (error_width/2),line_y),error_msg,font = helvetica18, fill = 0)
+        draw.text((500 - (error_width/2),line_y+error_height),error_msg,font = helvetica18, fill = 0)
 
     # draw.line((0,line_y,800,line_y), fill=0)
 
@@ -286,3 +286,15 @@ def draw_quote(draw, quote):
 def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
+
+def draw_startup_status(draw, wifi_status):
+    startup_text = "Starting Up..."
+    [startup_width, startup_height] = text_size(startup_text,courierbold50)
+    draw.text((400 - (startup_width/2),50), startup_text, font = courierbold50, fill = 0)
+
+    status_text = "Wifi Connected!"
+    if not wifi_status:
+        status_text = "Connecting Wifi"
+    
+    [status_width, status_height] = text_size(status_text, courierbold35)
+    draw.text((400 - (status_width/2),300),status_text, font = courierbold35, fill = 0)
