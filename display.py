@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from cgitb import text
 from typing import Any
 
 
@@ -19,7 +18,9 @@ logging.basicConfig(level=logging.DEBUG)
 helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
 helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
+helvetica30 = ImageFont.truetype("resources/Helvetica Roman.ttf", 30)
 helvetica32 = ImageFont.truetype("resources/Helvetica Roman.ttf", 32)
+helvetica34 = ImageFont.truetype("resources/Helvetica Roman.ttf", 34)
 helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
 
 def text_size(text, font_type):
@@ -67,10 +68,10 @@ def display_trains(draw):
 
     arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
 
-    padding = 3
-    radius = 21
+    padding = 5
+    radius = 18
 
-    train3_y = 450
+    train3_y = 445
     train2_y = train3_y - (2*radius) - padding
     train1_y = train2_y - (2*radius) - padding
 
@@ -94,39 +95,39 @@ def display_trains(draw):
     if not uptown_trains:
         draw.text((uptownX,train1_y + (nu_h/2)),no_uptown,font=helvetica24,fill=0)
     else:
-        draw.text((20, train1_y - radius - padding - (uptown_h/2)),uptown_text,font=helvetica32,fill=0)
+        draw.text((20, train1_y - radius - padding - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
 
         for i, (route, mins) in enumerate(uptown_trains):
             if i == 0:
-                add_train(draw,uptownX,train1_y,route,mins)
+                add_train(draw,uptownX,train1_y,route,mins,radius)
             if i == 1:
-                add_train(draw,uptownX,train2_y,route,mins)
+                add_train(draw,uptownX,train2_y,route,mins,radius)
             if i == 2:
-                add_train(draw,uptownX,train3_y,route,mins)
+                add_train(draw,uptownX,train3_y,route,mins,radius)
 
     if not downtown_trains:
         draw.text((downtownX - nd_h,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
     else:
-        draw.text((downtownX - 30 - downtown_w, train1_y - radius - padding - (downtown_h/2)),downtown_text,font=helvetica32,fill=0)
+        draw.text((downtownX - 30, train1_y - radius - padding - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
 
         for i, (route, mins) in enumerate(downtown_trains):
             if i == 0:
-                add_train(draw,downtownX,train1_y,route,mins)
+                add_train(draw,downtownX,train1_y,route,mins,radius)
             if i == 1:
-                add_train(draw,downtownX,train2_y,route,mins)
+                add_train(draw,downtownX,train2_y,route,mins,radius)
             if i == 2:
-                add_train(draw,downtownX,train3_y,route,mins) 
+                add_train(draw,downtownX,train3_y,route,mins,radius) 
 
-    line_y = train1_y - radius - padding - max(uptown_h,downtown_h) - padding
+    line_y = train1_y - radius - padding - max(uptown_h,downtown_h) - padding - padding
 
-    station_label = "125th Street"
-    [station_width, station_height] = text_size(station_label,helvetica24)
-    draw.text((20,line_y - station_height - 1),station_label,font = helvetica24, fill = 0)
+    # station_label = "125th Street"
+    # [station_width, station_height] = text_size(station_label,helvetica22)
+    # draw.text((20,line_y - station_height - 3),station_label,font = helvetica22, fill = 0)
 
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
-        [error_width, error_height] = text_size(error_msg, helvetica24)
-        draw.text((800 - 20 - error_width,line_y - error_height),error_msg,font = helvetica24, fill = 0)
+        [error_width, error_height] = text_size(error_msg, helvetica18)
+        draw.text((800 - 20 - error_width,line_y - error_height),error_msg,font = helvetica18, fill = 0)
 
     draw.line((0,line_y,800,line_y), fill=0)
 
