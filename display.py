@@ -231,7 +231,7 @@ def partial_train_update():
     epd = epd7in5_V2.EPD()
 
     epd.init_part()
-    PartialImage = Image.new('1', (epd.width, epd.height), 0)
+    PartialImage = Image.new('1', (epd.width, epd.height), 255)
     draw = ImageDraw.Draw(PartialImage)
 
     draw_trains(draw)
@@ -247,7 +247,7 @@ def full_screen_update():
     logging.info("Connecting for Full Update")
     epd = epd7in5_V2.EPD()
     
-    epd.init()
+    epd.init_fast()
     image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image_to_draw)
 
@@ -264,6 +264,13 @@ def full_screen_update():
     epd.sleep()
 
 try:
+    logging.info("Connecting for Full Update")
+    epd = epd7in5_V2.EPD()
+    
+    epd.init()
+    epd.clear()
+    epd.sleep()
+
     full_screen_update()
     time.sleep(10)
     partial_train_update()
