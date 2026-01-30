@@ -117,7 +117,7 @@ def draw_trains(draw):
                 add_train(draw,uptownX,train2_y,route,mins,radius)
 
     if not downtown_trains:
-        draw.text((downtownX - nd_w,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
+        draw.text((downtownX - (nd_w/2),train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
     else:
         draw.text((downtownX - 30, train1_y - radius - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
 
@@ -290,7 +290,7 @@ def draw_time(draw, timestr):
 def draw_startup_status(draw, wifi_status):
     startup_text = "Starting Up..."
     [startup_width, startup_height] = text_size(startup_text,courierbold50)
-    draw.text((400 - (startup_width/2),70), startup_text, font = courierbold50, fill = 0)
+    draw.text((400 - (startup_width/2),100), startup_text, font = courierbold50, fill = 0)
 
     status_text = "Wifi Connected!"
     if not wifi_status:

@@ -200,6 +200,7 @@ def prepare():
                 cycle_count += 1
             except requests.exceptions.ConnectionError:
                 cycle_count += 1
+                time.sleep(12)
             else:
                 wifi_connected = True
 
