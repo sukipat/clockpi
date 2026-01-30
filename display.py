@@ -63,7 +63,7 @@ def add_train(draw,x,y,train,min_away, rad):
     draw.text((distance_x,distance_y),distance_label,font=helvetica22, fill = 0)
 
 
-def display_trains(draw):
+def draw_trains(draw):
     AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
     BD_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
     FEED_URLS = [AC_FEED_URL, BD_FEED_URL]
@@ -136,10 +136,10 @@ def display_trains(draw):
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
-    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)  # top 320px
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * (3/4))
     PADDING_X = 50
     PADDING_TOP = 50
-    max_width = SCREEN_WIDTH - 2 * PADDING_X  # 700px
+    max_width = SCREEN_WIDTH - 2 * PADDING_X
     box_right = SCREEN_WIDTH - PADDING_X
     box_bottom = PADDING_TOP + QUOTE_HEIGHT
 
@@ -149,9 +149,9 @@ def draw_quote(draw, quote):
     [_, title_h] = text_size("X", courieritalic32)
 
     # Fixed line height for equal vertical spacing (max of quote fonts)
-    [_, h40] = text_size("X", courier40)
-    [_, h40bold] = text_size("X", courierbold40)
-    quote_line_height = max(h40, h40bold)
+    [_, h40] = text_size("j", courier40)
+    [_, h40bold] = text_size("j", courierbold40)
+    quote_line_height = max(h40, h40bold) + 5
 
     quote_first = quote.get("quote_first") or ""
     quote_time_case = quote.get("quote_time_case") or ""
@@ -193,12 +193,12 @@ def draw_quote(draw, quote):
     # Title 10px below last quote line, author below title; both right-aligned
     if title:
         [title_w, _] = text_size(title, courieritalic32)
-        title_y = last_quote_line_bottom + 10
+        title_y = last_quote_line_bottom + 30
         draw.text((box_right - title_w, title_y), title, font=courieritalic32, fill=0)
 
     if author:
         [author_w, _] = text_size(author, courier32)
-        author_y = last_quote_line_bottom + 10 + (title_h + 5 if title else 0)
+        author_y = last_quote_line_bottom + 30 + (title_h + 5 if title else 0)
         draw.text((box_right - author_w, author_y), author, font=courier32, fill=0)
 
     
@@ -215,24 +215,16 @@ try:
     epd.Clear()
 
     epd.init_fast()
-    QuoteImage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
-    QuoteDraw = ImageDraw.Draw(QuoteImage)
+    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    draw = ImageDraw.Draw(image_to_draw)
 
     timestr = time.strftime("%I:%M %p")
     quote = get_current_time_quote()
-    draw_time(QuoteDraw, timestr)
-    draw_quote(QuoteDraw, quote)
+    draw_time(draw, timestr)
+    draw_quote(draw, quote)
+    draw_trains(draw)
 
-    epd.display(epd.getbuffer(QuoteImage))
-    time.sleep(10)
-
-
-    logging.info("trying full update")
-    epd.init()
-    TrainImage = Image.new('1', (epd.width, epd.height), 255)
-    TrainDraw = ImageDraw.Draw(TrainImage)
-    display_trains(TrainDraw)
-    epd.display(epd.getbuffer(TrainImage))
+    epd.display(epd.getbuffer(image_to_draw))
     time.sleep(10)
 
     # partial update
