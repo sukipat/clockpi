@@ -116,8 +116,9 @@ async def scheduler():
         print("Shutdown requested — waiting for running tasks to finish...")
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
         print("Scheduler stopped cleanly.")
-        epd.sleep()
+
 
 
 async def main():
@@ -127,4 +128,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    full_display_update()
     asyncio.run(main())
