@@ -3,15 +3,15 @@
 from typing import Any
 
 
-import sys
-import os
+# import sys
+# import os
 import logging
 
-from numpy import full
+# from numpy import full
 from waveshare_epd import epd7in5_V2
 import time
 from PIL import Image,ImageDraw,ImageFont
-import traceback
+# import traceback
 
 from train_status import get_arriving_trains
 from literature_clock import get_current_time_quote
@@ -31,6 +31,20 @@ courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
 courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",36)
 
 courieritalic32 = ImageFont.truetype("resources/Courier New Italic.ttf",30)
+
+# Font paths for dynamic sizing
+COURIER_PATH = "resources/Courier New.ttf"
+COURIER_BOLD_PATH = "resources/Courier New Bold.ttf"
+COURIER_ITALIC_PATH = "resources/Courier New Italic.ttf"
+
+def _quote_fonts(size):
+    """Create quote, title, author fonts at given sizes. Title/author use 0.8x."""
+    return {
+        "quote": ImageFont.truetype(COURIER_PATH, size),
+        "quote_bold": ImageFont.truetype(COURIER_BOLD_PATH, size),
+        "title": ImageFont.truetype(COURIER_ITALIC_PATH, max(12, int(size * 0.8))),
+        "author": ImageFont.truetype(COURIER_PATH, max(12, int(size * 0.8))),
+    }
 
 def text_size(text, font_type):
     left,top,right,bottom = font_type.getbbox(text)
@@ -134,6 +148,63 @@ def draw_trains(draw):
 
     draw.line((0,line_y,800,line_y), fill=0)
 
+def _measure_quote_layout(quote, fonts, max_width):
+    """Measure total height of quote layout (no drawing). Returns (height, layout_info)."""
+    quote_first = quote.get("quote_first") or ""
+    quote_time_case = quote.get("quote_time_case") or ""
+    quote_last = quote.get("quote_last") or ""
+    title = quote.get("title") or ""
+    author = quote.get("author") or ""
+
+    qf, qb, tf, af = fonts["quote"], fonts["quote_bold"], fonts["title"], fonts["author"]
+
+    segments = [(quote_first, qf), (quote_time_case, qb), (quote_last, qf)]
+    tokens = []
+    for i, (text, font) in enumerate(segments):
+        words = text.split()
+        for j, word in enumerate(words):
+            is_last = i == len(segments) - 1 and j == len(words) - 1
+            tokens.append((word if is_last else word + " ", font))
+
+    [_, hq] = text_size("j", qf)
+    [_, hqb] = text_size("j", qb)
+    quote_line_height = max(hq, hqb) + 5
+
+    x, y = 0, 0
+    last_quote_line_bottom = 0
+    for word, font in tokens:
+        w, _ = text_size(word, font)
+        if x + w > max_width and x > 0:
+            x = 0
+            y += quote_line_height
+        x += w
+        last_quote_line_bottom = y + quote_line_height
+
+    total_height = last_quote_line_bottom + 10
+    [_, title_h] = text_size("X", tf)
+    title_line_height = title_h + 5
+
+    title_lines = []
+    if title:
+        current_line, current_width = [], 0
+        for word in title.split():
+            word_w, _ = text_size(word + " ", tf)
+            if current_line and current_width + word_w > max_width:
+                title_lines.append(" ".join(current_line))
+                current_line, current_width = [word], text_size(word + " ", tf)[0]
+            else:
+                current_line.append(word)
+                current_width += word_w
+        if current_line:
+            title_lines.append(" ".join(current_line))
+        total_height += len(title_lines) * title_line_height
+
+    if author:
+        [_, author_h] = text_size("X", af)
+        total_height += author_h
+
+    return total_height
+
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
@@ -143,29 +214,33 @@ def draw_quote(draw, quote):
     max_width = SCREEN_WIDTH - 2 * PADDING_X
     box_right = SCREEN_WIDTH - PADDING_X
     box_bottom = PADDING_TOP + QUOTE_HEIGHT
+    available_height = QUOTE_HEIGHT
 
-    title = quote.get("title") or ""
-    author = quote.get("author") or ""
-    [_, author_h] = text_size("X", courier32)
-    [_, title_h] = text_size("X", courieritalic32)
+    # Find largest font size that fits
+    FONT_SIZES = [40, 36, 32, 28, 24, 20, 18, 16, 14, 12]
+    fonts = None
+    for size in FONT_SIZES:
+        f = _quote_fonts(size)
+        h = _measure_quote_layout(quote, f, max_width)
+        if h <= available_height:
+            fonts = f
+            break
+    if fonts is None:
+        fonts = _quote_fonts(FONT_SIZES[-1])
 
-    # Fixed line height for equal vertical spacing (max of quote fonts)
-    [_, h40] = text_size("j", courier40)
-    [_, h40bold] = text_size("j", courierbold40)
-    quote_line_height = max(h40, h40bold) + 5
+    qf, qb, tf, af = fonts["quote"], fonts["quote_bold"], fonts["title"], fonts["author"]
 
     quote_first = quote.get("quote_first") or ""
     quote_time_case = quote.get("quote_time_case") or ""
     quote_last = quote.get("quote_last") or ""
+    title = quote.get("title") or ""
+    author = quote.get("author") or ""
 
-    # Segments as (text, font) - split into words for wrapping
-    segments = [
-        (quote_first, courier40),
-        (quote_time_case, courierbold40),
-        (quote_last, courier40),
-    ]
+    [_, hq] = text_size("j", qf)
+    [_, hqb] = text_size("j", qb)
+    quote_line_height = max(hq, hqb) + 5
 
-    # Build list of (word, font) tokens; add space after each word except possibly the last
+    segments = [(quote_first, qf), (quote_time_case, qb), (quote_last, qf)]
     tokens = []
     for i, (text, font) in enumerate(segments):
         words = text.split()
@@ -178,35 +253,29 @@ def draw_quote(draw, quote):
 
     for word, font in tokens:
         w, h = text_size(word, font)
-
         if x + w > PADDING_X + max_width and x > PADDING_X:
-            # Wrap to next line
             x = PADDING_X
             y += quote_line_height
-
         if y + quote_line_height > box_bottom:
-            break  # Don't draw beyond quote area
-
+            break
         draw.text((x, y), word, font=font, fill=0)
         x += w
         last_quote_line_bottom = y + quote_line_height
 
-    # Title 10px below last quote line, wrapped and right-aligned; author below title
+    [_, title_h] = text_size("X", tf)
     title_line_height = title_h + 5
     title_y = last_quote_line_bottom + 10
 
     if title:
         title_words = title.split()
         title_lines = []
-        current_line = []
-        current_width = 0
+        current_line, current_width = [], 0
         for word in title_words:
-            word_w, _ = text_size(word + " ", courieritalic32)
+            word_w, _ = text_size(word + " ", tf)
             if current_line and current_width + word_w > max_width:
-                line_text = " ".join(current_line)
-                title_lines.append(line_text)
+                title_lines.append(" ".join(current_line))
                 current_line = [word]
-                current_width = text_size(word + " ", courieritalic32)[0]
+                current_width = text_size(word + " ", tf)[0]
             else:
                 current_line.append(word)
                 current_width += word_w
@@ -214,13 +283,13 @@ def draw_quote(draw, quote):
             title_lines.append(" ".join(current_line))
 
         for line in title_lines:
-            line_w, _ = text_size(line, courieritalic32)
-            draw.text((box_right - line_w, title_y), line, font=courieritalic32, fill=0)
+            line_w, _ = text_size(line, tf)
+            draw.text((box_right - line_w, title_y), line, font=tf, fill=0)
             title_y += title_line_height
 
     if author:
-        [author_w, _] = text_size(author, courier32)
-        draw.text((box_right - author_w, title_y), author, font=courier32, fill=0)
+        [author_w, _] = text_size(author, af)
+        draw.text((box_right - author_w, title_y), author, font=af, fill=0)
 
 def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
@@ -237,7 +306,7 @@ def partial_train_update():
     draw_trains(draw)
     
     logging.info("Attempting Partial Update")
-    epd.display_Partial(epd.getbuffer(PartialImage),0,320,epd.width,epd.height)
+    epd.display_Partial(epd.getbuffer(PartialImage),0,0,epd.width,epd.height)
 
     logging.info("Goto Sleep...")
     epd.sleep()
@@ -268,7 +337,7 @@ try:
     epd = epd7in5_V2.EPD()
     
     epd.init()
-    epd.clear()
+    epd.Clear()
     epd.sleep()
 
     full_screen_update()
