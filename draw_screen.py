@@ -290,7 +290,7 @@ def draw_time(draw, timestr):
 def draw_startup_status(draw, wifi_status):
     startup_text = "Starting Up..."
     [startup_width, startup_height] = text_size(startup_text,courierbold50)
-    draw.text((400 - (startup_width/2),50), startup_text, font = courierbold50, fill = 0)
+    draw.text((400 - (startup_width/2),70), startup_text, font = courierbold50, fill = 0)
 
     status_text = "Wifi Connected!"
     if not wifi_status:

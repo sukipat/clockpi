@@ -207,7 +207,7 @@ def prepare():
                 draw.rectangle((0,0,epd.width,epd.height),fill = 255)
                 draw_startup_status(draw,wifi_connected)
 
-                epd.display_Partial(screen_image,0,0,epd.width,epd.height)
+                epd.display_Partial(epd.getbuffer(screen_image),0,0,epd.width,epd.height)
                 epd.sleep()
                 time.sleep(2)
                 break
