@@ -193,7 +193,7 @@ def prepare():
         epd.display(epd.getbuffer(screen_image))
         epd.sleep()
 
-        while(cycle_count < 5):
+        while(cycle_count < 8):
             try:
                 response = requests.get("https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace", timeout=12)
             except requests.exceptions.Timeout:
