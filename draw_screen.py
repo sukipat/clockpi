@@ -294,46 +294,61 @@ def draw_time(draw, timestr):
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
 
-def full_screen_update(draw):
+def full_screen_update():
+    epd = epd7in5_V2.EPD()
+
+    epd.init()
+    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
+    draw = ImageDraw.Draw(image_to_draw)
+
     timestr = time.strftime("%I:%M %p")
     quote = get_current_time_quote()
     draw_time(draw, timestr)
     draw_quote(draw, quote)
     draw_trains(draw)
 
-try:
-    logging.info("Connecting to display")
+    epd.display(epd.getbuffer(image_to_draw))
+    epd.sleep()
+
+def full_screen_update_fast():
     epd = epd7in5_V2.EPD()
-    
-    epd.init()
-    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+
+    epd.init_fast()
+    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image_to_draw)
 
-    logging.info("Initial Draw")
-    full_screen_update(draw)
-    epd.display(epd.getbuffer(image_to_draw))
-
-    logging.info("Sleeping")
-    epd.sleep()
-    time.sleep(10)
-
-    logging.info("Partial Draw")
-    epd.init_part()
+    timestr = time.strftime("%I:%M %p")
+    quote = get_current_time_quote()
+    draw_time(draw, timestr)
+    draw_quote(draw, quote)
     draw_trains(draw)
-    epd.display_Partial(epd.getbuffer(image_to_draw),0,320,epd.width,epd.height)
 
-    logging.info("Sleeping")
+    epd.display(epd.getbuffer(image_to_draw))
     epd.sleep()
-    time.sleep(10)
 
-    logging.info("Second full draw")
-    epd.init()
-    HImage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
-    Hdraw = ImageDraw.Draw(HImage)
-    full_screen_update(Hdraw)
-    epd.display(epd.getbuffer(HImage))
 
+def partial_time_update():
+    epd = epd7in5_V2.EPD()
+
+    epd.init_part()
+    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
+    draw = ImageDraw.Draw(image_to_draw)
+
+    timestr = time.strftime("%I:%M %p")
+    draw_time(draw, timestr)
+
+    epd.display_Partial(epd.getbuffer(image_to_draw),0, 0, epd.width, 50)
     epd.sleep()
+
+try:
+    
+    full_screen_update()
+    time.sleep(5)
+
+    partial_time_update()
+    time.sleep(5)
+
+    full_screen_update_fast()
     # partial update
 #     logging.info("5.show time")
 #     epd.init_part()
