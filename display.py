@@ -78,7 +78,7 @@ def draw_trains(draw):
     padding = 5
     radius = 18
 
-    train2_y = 445
+    train2_y = 452
     train1_y = train2_y - (2*radius) - padding
 
     uptownX = 50
@@ -136,7 +136,7 @@ def draw_trains(draw):
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
-    QUOTE_HEIGHT = int(SCREEN_HEIGHT * (3/4))
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)
     PADDING_X = 50
     PADDING_TOP = 50
     max_width = SCREEN_WIDTH - 2 * PADDING_X
@@ -190,16 +190,36 @@ def draw_quote(draw, quote):
         x += w
         last_quote_line_bottom = y + quote_line_height
 
-    # Title 10px below last quote line, author below title; both right-aligned
+    # Title 10px below last quote line, wrapped and right-aligned; author below title
+    title_line_height = title_h + 5
+    title_y = last_quote_line_bottom + 10
+
     if title:
-        [title_w, _] = text_size(title, courieritalic32)
-        title_y = last_quote_line_bottom + 30
-        draw.text((box_right - title_w, title_y), title, font=courieritalic32, fill=0)
+        title_words = title.split()
+        title_lines = []
+        current_line = []
+        current_width = 0
+        for word in title_words:
+            word_w, _ = text_size(word + " ", courieritalic32)
+            if current_line and current_width + word_w > max_width:
+                line_text = " ".join(current_line)
+                title_lines.append(line_text)
+                current_line = [word]
+                current_width = text_size(word + " ", courieritalic32)[0]
+            else:
+                current_line.append(word)
+                current_width += word_w
+        if current_line:
+            title_lines.append(" ".join(current_line))
+
+        for line in title_lines:
+            line_w, _ = text_size(line, courieritalic32)
+            draw.text((box_right - line_w, title_y), line, font=courieritalic32, fill=0)
+            title_y += title_line_height
 
     if author:
         [author_w, _] = text_size(author, courier32)
-        author_y = last_quote_line_bottom + 30 + (title_h + 5 if title else 0)
-        draw.text((box_right - author_w, author_y), author, font=courier32, fill=0)
+        draw.text((box_right - author_w, title_y), author, font=courier32, fill=0)
 
     
 def draw_time(draw, timestr):
