@@ -21,16 +21,14 @@ logging.basicConfig(level=logging.DEBUG)
 helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
 helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
-helvetica32 = ImageFont.truetype("resources/Helvetica Roman.ttf", 32)
-helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
+helvetica31 = ImageFont.truetype("resources/Helvetica Roman.ttf", 31)
 
-courier32 = ImageFont.truetype("resources/Courier New.ttf",30)
-courier40 = ImageFont.truetype("resources/Courier New.ttf",36)
+courier18 = ImageFont.truetype("resources/Courier New.ttf", 18)
+courier22 = ImageFont.truetype("resources/Courier New.ttf", 22)
+courier24 = ImageFont.truetype("resources/Courier New.ttf", 24)
+courier31 = ImageFont.truetype("resources/Courier New.ttf", 31)
 
 courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
-courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",36)
-
-courieritalic32 = ImageFont.truetype("resources/Courier New Italic.ttf",30)
 
 # Font paths for dynamic sizing
 COURIER_PATH = "resources/Courier New.ttf"
@@ -60,12 +58,12 @@ def add_train(draw,x,y,train,min_away, rad):
     x2 = x + radius
     y2 = y + radius
 
-    [width,height] = text_size(train,helvetica32)
+    [width,height] = text_size(train,helvetica31)
     fontX = x - (width/2)
     fontY = y - (height/2)
 
     draw.chord((x1,y1,x2,y2),0,360,fill=0)
-    draw.text((fontX,fontY),train,font=helvetica32, fill = 1)
+    draw.text((fontX,fontY),train,font=helvetica31, fill = 1)
 
     distance_label = ""
     if min_away == 0:
@@ -73,10 +71,10 @@ def add_train(draw,x,y,train,min_away, rad):
     else:
         distance_label = str(min_away) + " min away"
 
-    [distance_width, distance_height] = text_size(distance_label,helvetica22)
+    [distance_width, distance_height] = text_size(distance_label,courier22)
     distance_x = x + radius + 10
     distance_y = y - (distance_height/2) + 2
-    draw.text((distance_x,distance_y),distance_label,font=helvetica22, fill = 0)
+    draw.text((distance_x,distance_y),distance_label,font=courier22, fill = 0)
 
 def draw_trains(draw):
     AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
@@ -342,8 +340,8 @@ try:
 
     full_screen_update()
     time.sleep(10)
-    partial_train_update()
-    time.sleep(10)
+    # partial_train_update()
+    # time.sleep(10)
     full_screen_update()
 
     # partial update
