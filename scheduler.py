@@ -144,7 +144,7 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            if counter == 5 or counter == -1:
+            if counter == 3 or counter == -1:
                 task = asyncio.create_task(asyncio.to_thread(full_display_update))
                 counter = 1
             else:
@@ -169,6 +169,8 @@ async def scheduler():
         print("Shutdown requested — waiting for running tasks to finish...")
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
+        epd.init_fast()
+        epd.Clear()
         epd7in5_V2.epdconfig.module_exit(cleanup=True)
         print("Scheduler stopped cleanly.")
 
