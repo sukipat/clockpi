@@ -30,7 +30,7 @@ def full_display_update():
 
     with epd_lock:
         try:
-            epd.init()
+            epd.init_fast()
             screen_image = Image.new('1',(epd.width, epd.height),255)
             draw = ImageDraw.Draw(screen_image)
 
@@ -55,6 +55,41 @@ def full_display_update():
             epd7in5_V2.epdconfig.module_exit(cleanup=True)
             exit()
 
+def partial_screen_refresh():
+    global existing_draw, existing_image
+
+    logging.info("Attempting partial screen refresh")
+
+    with epd_lock:
+        if not existing_draw or not existing_image:
+            logging.info("No existing image found")
+            full_display_update()
+            return
+
+        try:
+            epd.init_part()
+
+            existing_draw.rectangle((0,0,epd.width,epd.height), fill = 255)
+            
+            timestr = time.strftime("%I:%M %p")
+            quote = get_current_time_quote()
+
+            draw_time(existing_draw, timestr)
+            draw_quote(existing_draw, quote)
+            draw_trains(existing_draw)
+
+            epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
+            logging.info("Closing connection after partial refresh")
+            epd.sleep()
+
+        except IOError as e:
+            logging.info(e)
+            
+        except KeyboardInterrupt:    
+            logging.info("ctrl + c:")
+            epd7in5_V2.epdconfig.module_exit(cleanup=True)
+            exit()
+
 def partial_train_refresh():
     global existing_draw, existing_image
 
@@ -69,7 +104,7 @@ def partial_train_refresh():
         try:
             epd.init_part()
 
-            existing_draw.rectangle((0,375,800,480), fill = 255)
+            existing_draw.rectangle((0,375,epd.width,epd.height), fill = 255)
             draw_trains(existing_draw)
 
             epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
@@ -91,6 +126,7 @@ def install_signal_handlers():
 
 async def scheduler():
     tasks = set()
+    counter = 0
 
     try:
         while not shutdown_event.is_set():
@@ -108,7 +144,12 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            task = asyncio.create_task(asyncio.to_thread(full_display_update))
+            counter += 1
+            if counter == 5:
+                task = asyncio.create_task(asyncio.to_thread(full_display_update))
+                counter = 0
+            else:
+                task = asyncio.create_task(asyncio.to_thread(partial_screen_refresh))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
