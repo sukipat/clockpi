@@ -28,7 +28,7 @@ courier40 = ImageFont.truetype("resources/Courier New.ttf",40)
 courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
 courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",40)
 
-courieritalic35 = ImageFont.truetype("resources/Courier New Italic.ttf",35)
+courieritalic32 = ImageFont.truetype("resources/Courier New Italic.ttf",32)
 
 def text_size(text, font_type):
     left,top,right,bottom = font_type.getbbox(text)
@@ -143,8 +143,18 @@ def draw_quote(draw, quote):
     SCREEN_HEIGHT = 480
     QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)  # top 320px
     PADDING_X = 50
-    PADDING_TOP = 30
+    PADDING_TOP = 100
     max_width = SCREEN_WIDTH - 2 * PADDING_X  # 700px
+    box_right = SCREEN_WIDTH - PADDING_X
+    box_bottom = PADDING_TOP + QUOTE_HEIGHT
+
+    # Reserve bottom for title + author (right-aligned)
+    title = quote.get("title") or ""
+    author = quote.get("author") or ""
+    [_, author_h] = text_size("X", courier32)
+    [_, title_h] = text_size("X", courieritalic32)
+    attribution_height = (title_h + 5 + author_h) if (title or author) else 0
+    quote_text_bottom = box_bottom - attribution_height
 
     quote_first = quote.get("quote_first") or ""
     quote_time_case = quote.get("quote_time_case") or ""
@@ -178,11 +188,22 @@ def draw_quote(draw, quote):
             y += line_height
             line_height = h
 
-        if y + h > PADDING_TOP + QUOTE_HEIGHT:
+        if y + h > quote_text_bottom:
             break  # Don't draw beyond quote area
 
         draw.text((x, y), word, font=font, fill=0)
         x += w
+
+    # Title and author at bottom of box, right-aligned (title above author)
+    if author:
+        [author_w, _] = text_size(author, courier32)
+        author_y = box_bottom - author_h
+        draw.text((box_right - author_w, author_y), author, font=courier32, fill=0)
+
+    if title:
+        [title_w, _] = text_size(title, courieritalic32)
+        title_y = box_bottom - title_h - (author_h + 5 if author else 0)
+        draw.text((box_right - title_w, title_y), title, font=courieritalic32, fill=0)
 
     
 def draw_time(draw, timestr):
