@@ -63,7 +63,7 @@ def add_train(draw,x,y,train,min_away, rad):
     fontY = y - (height/2)
 
     draw.chord((x1,y1,x2,y2),0,360,fill=0)
-    draw.text((fontX,fontY),train,font=helvetica31, fill = 1)
+    draw.text((fontX,fontY-1),train,font=helvetica31, fill = 1)
 
     distance_label = ""
     if min_away == 0:
@@ -142,9 +142,9 @@ def draw_trains(draw):
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
         [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((800 - 20 - error_width,line_y - error_height),error_msg,font = helvetica18, fill = 0)
+        draw.text((400 - (error_width/2),line_y),error_msg,font = helvetica18, fill = 0)
 
-    draw.line((0,line_y,800,line_y), fill=0)
+    # draw.line((0,line_y,800,line_y), fill=0)
 
 def _measure_quote_layout(quote, fonts, max_width):
     """Measure total height of quote layout (no drawing). Returns (height, layout_info)."""
@@ -298,16 +298,16 @@ def partial_train_update():
     epd = epd7in5_V2.EPD()
 
     epd.init_part()
-    PartialImage = Image.new('1', (epd.width, epd.height), 255)
+    PartialImage = Image.new('1', (epd.width, epd.height), 0)
     draw = ImageDraw.Draw(PartialImage)
 
     draw_trains(draw)
     
     logging.info("Attempting Partial Update")
-    epd.display_Partial(epd.getbuffer(PartialImage),0,0,epd.width,epd.height)
+    epd.display_Partial(epd.getbuffer(PartialImage),0,320,epd.width,epd.height)
 
-    logging.info("Goto Sleep...")
-    epd.sleep()
+    # logging.info("Goto Sleep...")
+    # epd.sleep()
     
 
 def full_screen_update():

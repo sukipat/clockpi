@@ -120,10 +120,10 @@ def get_arriving_trains(URLS, station, trains, train_count):
 		if feed["error"]:
 			e = feed["error"]
 			if e == "network":
-				error_code = "Network connection issue, some trains may not be displayed"
+				error_code = "Network connection issue,\nsome trains may not be displayed"
 				continue
 			else:
-				error_code = "Issue fetching feed, some trains may not be displayed"
+				error_code = "Issue fetching feed,\nsome trains may not be displayed"
 				continue
 		feeds.append(feed)
 
