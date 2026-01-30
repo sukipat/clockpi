@@ -20,8 +20,6 @@ existing_draw = None
 shutdown_event = asyncio.Event()
 epd_lock = threading.Lock()
 
-
-
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -71,7 +69,7 @@ def partial_train_refresh():
         try:
             epd.init_part()
 
-            existing_draw.rectangle((0,320,800,480), fill = 255)
+            existing_draw.rectangle((0,375,800,480), fill = 255)
             draw_trains(existing_draw)
 
             epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
@@ -110,7 +108,7 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            task = asyncio.create_task(asyncio.to_thread(full_display_update()))
+            task = asyncio.create_task(asyncio.to_thread(full_display_update))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -122,7 +120,7 @@ async def scheduler():
                 pass
 
             # Schedule partial update
-            task = asyncio.create_task(asyncio.to_thread(partial_train_refresh()))
+            task = asyncio.create_task(asyncio.to_thread(partial_train_refresh))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -141,5 +139,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    full_display_update()
     asyncio.run(main())
