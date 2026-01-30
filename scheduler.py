@@ -126,7 +126,7 @@ def install_signal_handlers():
 
 async def scheduler():
     tasks = set()
-    counter = 0
+    counter = -1
 
     try:
         while not shutdown_event.is_set():
@@ -144,12 +144,12 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            counter += 1
-            if counter == 5:
+            if counter == 5 or counter == -1:
                 task = asyncio.create_task(asyncio.to_thread(full_display_update))
-                counter = 0
+                counter = 1
             else:
                 task = asyncio.create_task(asyncio.to_thread(partial_screen_refresh))
+                counter += 1
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
