@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from cgitb import text
 from typing import Any
 
 
@@ -17,7 +16,9 @@ from train_status import get_arriving_trains
 logging.basicConfig(level=logging.DEBUG)
 
 helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
+helvetica20 = ImageFont.truetype("resources/Helvetica Roman.ttf", 20)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
+helvetica30 = ImageFont.truetype("resources/Helvetica Roman.ttf", 30)
 helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
 
 def text_size(text, font_type):
@@ -27,19 +28,19 @@ def text_size(text, font_type):
     return [width, height]
 
 def add_train(draw,x,y,train,min_away):
-    radius = 15
+    radius = 21
    
     x1 = x - radius
     y1 = y - radius
     x2 = x + radius
     y2 = y + radius
 
-    [width,height] = text_size(train,helvetica24)
+    [width,height] = text_size(train,helvetica30)
     fontX = x - (width/2)
     fontY = y - (height/2)
 
     draw.chord((x1,y1,x2,y2),0,360,fill=0)
-    draw.text((fontX,fontY),train,font=helvetica24, fill = 1)
+    draw.text((fontX,fontY),train,font=helvetica30, fill = 1)
 
     distance_label = ""
     if min_away == 0:
@@ -47,10 +48,10 @@ def add_train(draw,x,y,train,min_away):
     else:
         distance_label = str(min_away) + " min away"
 
-    [distance_width, distance_height] = text_size(distance_label,helvetica24)
-    distance_x = x + 40
+    [distance_width, distance_height] = text_size(distance_label,helvetica20)
+    distance_x = x + 30
     distance_y = y - (distance_height/2) + 2
-    draw.text((distance_x,distance_y),distance_label,font=helvetica24, fill = 0)
+    draw.text((distance_x,distance_y),distance_label,font=helvetica20, fill = 0)
 
 
 def display_trains(draw):
