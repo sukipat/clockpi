@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+from cgitb import text
 from typing import Any
 
 
@@ -16,9 +17,9 @@ from train_status import get_arriving_trains
 logging.basicConfig(level=logging.DEBUG)
 
 helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
-helvetica20 = ImageFont.truetype("resources/Helvetica Roman.ttf", 20)
+helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
-helvetica30 = ImageFont.truetype("resources/Helvetica Roman.ttf", 30)
+helvetica32 = ImageFont.truetype("resources/Helvetica Roman.ttf", 32)
 helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
 
 def text_size(text, font_type):
@@ -27,20 +28,20 @@ def text_size(text, font_type):
     height = bottom - top
     return [width, height]
 
-def add_train(draw,x,y,train,min_away):
-    radius = 21
+def add_train(draw,x,y,train,min_away, rad):
+    radius = rad
    
     x1 = x - radius
     y1 = y - radius
     x2 = x + radius
     y2 = y + radius
 
-    [width,height] = text_size(train,helvetica30)
+    [width,height] = text_size(train,helvetica32)
     fontX = x - (width/2)
     fontY = y - (height/2)
 
     draw.chord((x1,y1,x2,y2),0,360,fill=0)
-    draw.text((fontX,fontY),train,font=helvetica30, fill = 1)
+    draw.text((fontX,fontY),train,font=helvetica32, fill = 1)
 
     distance_label = ""
     if min_away == 0:
@@ -48,10 +49,10 @@ def add_train(draw,x,y,train,min_away):
     else:
         distance_label = str(min_away) + " min away"
 
-    [distance_width, distance_height] = text_size(distance_label,helvetica20)
-    distance_x = x + 30
+    [distance_width, distance_height] = text_size(distance_label,helvetica22)
+    distance_x = x + radius + 10
     distance_y = y - (distance_height/2) + 2
-    draw.text((distance_x,distance_y),distance_label,font=helvetica20, fill = 0)
+    draw.text((distance_x,distance_y),distance_label,font=helvetica22, fill = 0)
 
 
 def display_trains(draw):
@@ -66,23 +67,35 @@ def display_trains(draw):
 
     arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
 
-    train1_y = 340
-    train2_y = 395
+    padding = 3
+    radius = 21
+
     train3_y = 450
-    
+    train2_y = train3_y - (2*radius) - padding
+    train1_y = train2_y - (2*radius) - padding
+
     uptownX = 50
     downtownX = 600
+
 
     uptown_trains = arriving_trains["uptown"]
     downtown_trains = arriving_trains["downtown"]
 
     no_uptown = "No uptown arrivals soon..."
+    [nu_w,nu_h] = text_size(no_uptown,helvetica24)
     no_downtown = "No downtown arrivals soon..."
+    [nd_w,nd_h] = text_size(no_downtown,helvetica24)
+
+    uptown_text = "Uptown:"
+    [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
+    downtown_text = "Uptown:"
+    [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
 
     if not uptown_trains:
-        [nu_w,nu_h] = text_size(no_uptown,helvetica24)
-        draw.text((20,320 + (nu_h/2)),no_uptown,font=helvetica24,fill=0)
+        draw.text((uptownX,train1_y + (nu_h/2)),no_uptown,font=helvetica24,fill=0)
     else:
+        draw.text((20, train1_y - radius - padding - (uptown_h/2)),uptown_text,font=helvetica32,fill=0)
+
         for i, (route, mins) in enumerate(uptown_trains):
             if i == 0:
                 add_train(draw,uptownX,train1_y,route,mins)
@@ -92,9 +105,10 @@ def display_trains(draw):
                 add_train(draw,uptownX,train3_y,route,mins)
 
     if not downtown_trains:
-        [nd_w,nd_h] = text_size(no_downtown,helvetica24)
-        draw.text((575,320 + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
+        draw.text((downtownX - nd_h,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
     else:
+        draw.text((downtownX - 30 - downtown_w, train1_y - radius - padding - (downtown_h/2)),downtown_text,font=helvetica32,fill=0)
+
         for i, (route, mins) in enumerate(downtown_trains):
             if i == 0:
                 add_train(draw,downtownX,train1_y,route,mins)
@@ -103,19 +117,18 @@ def display_trains(draw):
             if i == 2:
                 add_train(draw,downtownX,train3_y,route,mins) 
 
-    caption_y = 310
+    line_y = train1_y - radius - padding - max(uptown_h,downtown_h) - padding
+
     station_label = "125th Street"
-    [station_width, station_height] = text_size(station_label,helvetica18)
-    draw.text((20,310 - station_height),station_label,font = helvetica18, fill = 0)
+    [station_width, station_height] = text_size(station_label,helvetica24)
+    draw.text((20,line_y - station_height - 1),station_label,font = helvetica24, fill = 0)
 
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
-        [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((20,310 - error_height),error_msg,font = helvetica18, fill = 0)
+        [error_width, error_height] = text_size(error_msg, helvetica24)
+        draw.text((800 - 20 - error_width,line_y - error_height),error_msg,font = helvetica24, fill = 0)
 
-    draw.line((0,310,800,310), fill=0)
-    draw.line((0,310 - station_height,800,310 - station_height), fill=0)
-
+    draw.line((0,line_y,800,line_y), fill=0)
 
 try:
     logging.info("epd7in5_V2 Demo")
@@ -133,7 +146,7 @@ try:
     draw.text((400 - (timeWidth/2),0), "3:55PM", font = helvetica35, fill = 0)   
     draw.line((400,50,400,200), fill = 0)
 
-    add_train(draw,600,300,"D",5)
+    add_train(draw,600,300,"D",5,21)
 
     epd.display(epd.getbuffer(Himage))
     time.sleep(10)
