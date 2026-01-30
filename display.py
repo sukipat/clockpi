@@ -26,20 +26,20 @@ def text_size(text, font_type):
     height = bottom - top
     return [width, height]
 
-def add_train(image,x,y,train,min_away):
-    radius = 25
+def add_train(draw,x,y,train,min_away):
+    radius = 15
    
     x1 = x - radius
     y1 = y - radius
     x2 = x + radius
     y2 = y + radius
 
-    [width,height] = text_size(train,helvetica35)
+    [width,height] = text_size(train,helvetica24)
     fontX = x - (width/2)
     fontY = y - (height/2)
 
-    image.chord((x1,y1,x2,y2),0,360,fill=0)
-    image.text((fontX,fontY),train,font=helvetica35, fill = 1)
+    draw.chord((x1,y1,x2,y2),0,360,fill=0)
+    draw.text((fontX,fontY),train,font=helvetica24, fill = 1)
 
     distance_label = ""
     if min_away == 0:
@@ -50,10 +50,10 @@ def add_train(image,x,y,train,min_away):
     [distance_width, distance_height] = text_size(distance_label,helvetica24)
     distance_x = x + 40
     distance_y = y - (distance_height/2) + 2
-    image.text((distance_x,distance_y),distance_label,font=helvetica24, fill = 0)
+    draw.text((distance_x,distance_y),distance_label,font=helvetica24, fill = 0)
 
 
-def display_trains(epd):
+def display_trains(draw):
     AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
     BD_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
     FEED_URLS = [AC_FEED_URL, BD_FEED_URL]
@@ -62,9 +62,6 @@ def display_trains(epd):
     TARGET_STOP = "A15"
 
     NUM_TRAINS = 3
-
-    image = Image.new('1', (epd.width, epd.height), 255)
-    draw = ImageDraw.Draw(image)
 
     arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
 
@@ -87,11 +84,11 @@ def display_trains(epd):
     else:
         for i, (route, mins) in enumerate(uptown_trains):
             if i == 0:
-                add_train(image,uptownX,train1_y,route,mins)
+                add_train(draw,uptownX,train1_y,route,mins)
             if i == 1:
-                add_train(image,uptownX,train2_y,route,mins)
+                add_train(draw,uptownX,train2_y,route,mins)
             if i == 2:
-                add_train(image,uptownX,train3_y,route,mins)
+                add_train(draw,uptownX,train3_y,route,mins)
 
     if not downtown_trains:
         [nd_w,nd_h] = text_size(no_downtown,helvetica24)
@@ -99,11 +96,11 @@ def display_trains(epd):
     else:
         for i, (route, mins) in enumerate(downtown_trains):
             if i == 0:
-                add_train(image,downtownX,train1_y,route,mins)
+                add_train(draw,downtownX,train1_y,route,mins)
             if i == 1:
-                add_train(image,downtownX,train2_y,route,mins)
+                add_train(draw,downtownX,train2_y,route,mins)
             if i == 2:
-                add_train(image,downtownX,train3_y,route,mins) 
+                add_train(draw,downtownX,train3_y,route,mins) 
 
     caption_y = 310
     station_label = "125th Street"
@@ -117,8 +114,6 @@ def display_trains(epd):
 
     draw.line((0,310,800,310), fill=0)
     draw.line((0,310 - station_height,800,310 - station_height), fill=0)
-
-    return image
 
 
 try:
@@ -145,7 +140,9 @@ try:
 
     logging.info("trying full update")
     epd.init()
-    TrainImage = display_trains(epd)
+    TrainImage = Image.new('1', (epd.width, epd.height), 255)
+    TrainDraw = ImageDraw.Draw(TrainImage)
+    display_trains(TrainDraw)
     epd.display(epd.getbuffer(TrainImage))
     time.sleep(10)
 
