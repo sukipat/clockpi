@@ -1,7 +1,9 @@
 # scheduler.py
+from concurrent.futures import thread
 import time
 import asyncio
 import signal
+import threading
 
 from waveshare_epd import epd7in5_V2
 from PIL import Image,ImageDraw,ImageFont
@@ -16,61 +18,73 @@ existing_image = None
 existing_draw = None
 
 shutdown_event = asyncio.Event()
+epd_lock = threading.Lock()
+
 
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
 def full_display_update():
+    global existing_draw, existing_image
+
     logging.info("Attempting full refresh")
-    try:
-        epd.init()
-        screen_image = Image.new('1',(epd.width, epd.height),255)
-        draw = ImageDraw.Draw(screen_image)
 
-        timestr = time.strftime("%I:%M %p")
-        quote = get_current_time_quote()
+    with epd_lock:
+        try:
+            epd.init()
+            screen_image = Image.new('1',(epd.width, epd.height),255)
+            draw = ImageDraw.Draw(screen_image)
 
-        draw_time(draw, timestr)
-        draw_quote(draw, quote)
-        draw_trains(draw)
+            timestr = time.strftime("%I:%M %p")
+            quote = get_current_time_quote()
 
-        existing_draw = draw
-        existing_image = screen_image
+            draw_time(draw, timestr)
+            draw_quote(draw, quote)
+            draw_trains(draw)
 
-        epd.display(epd.getbuffer(screen_image))
-        logging.info("Closing connection after partial refresh")
-        epd.sleep()
-    except IOError as e:
-        logging.info(e)
-        
-    except KeyboardInterrupt:    
-        logging.info("ctrl + c:")
-        epd7in5_V2.epdconfig.module_exit(cleanup=True)
-        exit()
+            existing_draw = draw
+            existing_image = screen_image
+
+            epd.display(epd.getbuffer(screen_image))
+            logging.info("Closing connection after full refresh")
+            epd.sleep()
+        except IOError as e:
+            logging.info(e)
+            
+        except KeyboardInterrupt:    
+            logging.info("ctrl + c:")
+            epd7in5_V2.epdconfig.module_exit(cleanup=True)
+            exit()
 
 def partial_train_refresh():
+    global existing_draw, existing_image
+
     logging.info("Attempting partial refresh")
-    if not existing_draw or not existing_image:
-        full_display_update()
-        logging.info("No existing image found")
-        return
 
-    try:
-        existing_draw.rectangle((0,320,800,480), fill = 255)
-        draw_trains(existing_draw)
+    with epd_lock:
+        if not existing_draw or not existing_image:
+            logging.info("No existing image found")
+            full_display_update()
+            return
 
-        epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
-        logging.info("Closing connection after partial refresh")
-        epd.sleep()
+        try:
+            epd.init_part()
 
-    except IOError as e:
-        logging.info(e)
-        
-    except KeyboardInterrupt:    
-        logging.info("ctrl + c:")
-        epd7in5_V2.epdconfig.module_exit(cleanup=True)
-        exit()
+            existing_draw.rectangle((0,320,800,480), fill = 255)
+            draw_trains(existing_draw)
+
+            epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
+            logging.info("Closing connection after partial refresh")
+            epd.sleep()
+
+        except IOError as e:
+            logging.info(e)
+            
+        except KeyboardInterrupt:    
+            logging.info("ctrl + c:")
+            epd7in5_V2.epdconfig.module_exit(cleanup=True)
+            exit()
 
 def install_signal_handlers():
     loop = asyncio.get_running_loop()
@@ -96,7 +110,7 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            task = asyncio.create_task(full_display_update())
+            task = asyncio.create_task(asyncio.to_thread(full_display_update()))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -108,7 +122,7 @@ async def scheduler():
                 pass
 
             # Schedule partial update
-            task = asyncio.create_task(partial_train_refresh())
+            task = asyncio.create_task(asyncio.to_thread(partial_train_refresh()))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
