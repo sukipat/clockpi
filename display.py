@@ -6,6 +6,8 @@ from typing import Any
 import sys
 import os
 import logging
+
+from numpy import full
 from waveshare_epd import epd7in5_V2
 import time
 from PIL import Image,ImageDraw,ImageFont
@@ -61,7 +63,6 @@ def add_train(draw,x,y,train,min_away, rad):
     distance_x = x + radius + 10
     distance_y = y - (distance_height/2) + 2
     draw.text((distance_x,distance_y),distance_label,font=helvetica22, fill = 0)
-
 
 def draw_trains(draw):
     AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
@@ -221,20 +222,32 @@ def draw_quote(draw, quote):
         [author_w, _] = text_size(author, courier32)
         draw.text((box_right - author_w, title_y), author, font=courier32, fill=0)
 
-    
 def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
-try:
-    logging.info("epd7in5_V2 Demo")
+def partial_train_update():
+    logging.info("Connecting for Partial Update")
+    epd = epd7in5_V2.EPD()
+
+    epd.init_part()
+    PartialImage = Image.new('1', (epd.width, epd.height), 0)
+    draw = ImageDraw.Draw(PartialImage)
+
+    draw_trains(draw)
+    
+    logging.info("Attempting Partial Update")
+    epd.display_Partial(epd.getbuffer(PartialImage),0,320,epd.width,epd.height)
+
+    logging.info("Goto Sleep...")
+    epd.sleep()
+    
+
+def full_screen_update():
+    logging.info("Connecting for Full Update")
     epd = epd7in5_V2.EPD()
     
-    logging.info("init and Clear")
     epd.init()
-    epd.Clear()
-
-    epd.init_fast()
     image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image_to_draw)
 
@@ -244,8 +257,18 @@ try:
     draw_quote(draw, quote)
     draw_trains(draw)
 
+    logging.info("Attempting Full Screen Update")
     epd.display(epd.getbuffer(image_to_draw))
+
+    logging.info("Goto Sleep...")
+    epd.sleep()
+
+try:
+    full_screen_update()
     time.sleep(10)
+    partial_train_update()
+    time.sleep(10)
+    full_screen_update()
 
     # partial update
 #     logging.info("5.show time")
@@ -310,8 +333,8 @@ try:
 #     epd.init()
 #     epd.Clear()
 
-    logging.info("Goto Sleep...")
-    epd.sleep()
+    # logging.info("Goto Sleep...")
+    # epd.sleep()
     
 except IOError as e:
     logging.info(e)
