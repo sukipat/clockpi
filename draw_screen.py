@@ -294,61 +294,82 @@ def draw_time(draw, timestr):
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
 
-def full_screen_update():
+def full_screen_update(draw):
+    # epd = epd7in5_V2.EPD()
+
+    # epd.init()
+    # image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    # draw = ImageDraw.Draw(image_to_draw)
+
+    timestr = time.strftime("%I:%M %p")
+    quote = get_current_time_quote()
+    draw_time(draw, timestr)
+    draw_quote(draw, quote)
+    draw_trains(draw)
+
+    # epd.display(epd.getbuffer(image_to_draw))
+    # epd.sleep()
+
+def full_screen_update_fast(draw):
+    # epd = epd7in5_V2.EPD()
+
+    # epd.init_fast()
+    # image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    # draw = ImageDraw.Draw(image_to_draw)
+
+    timestr = time.strftime("%I:%M %p")
+    quote = get_current_time_quote()
+    draw_time(draw, timestr)
+    draw_quote(draw, quote)
+    draw_trains(draw)
+
+    # epd.display(epd.getbuffer(image_to_draw))
+    # epd.sleep()
+
+
+def partial_time_update(draw):
+    # epd = epd7in5_V2.EPD()
+
+    # epd.init_part()
+    # image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    # draw = ImageDraw.Draw(image_to_draw)
+
+    draw.rectangle((0,0,800,30), fill = 255)
+    draw.rectangle((0,320,800,480), fill = 255)
+
+
+    timestr = time.strftime("%I:%M %p")
+    draw_time(draw, timestr)
+    draw_trains(draw)
+
+    # epd.display_Partial(epd.getbuffer(image_to_draw),0, 0, epd.width, 50)
+    # epd.sleep()
+
+try:
     epd = epd7in5_V2.EPD()
 
     epd.init()
-    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
+    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image_to_draw)
 
-    timestr = time.strftime("%I:%M %p")
-    quote = get_current_time_quote()
-    draw_time(draw, timestr)
-    draw_quote(draw, quote)
-    draw_trains(draw)
-
+    full_screen_update(draw)
     epd.display(epd.getbuffer(image_to_draw))
-    epd.sleep()
-
-def full_screen_update_fast():
-    epd = epd7in5_V2.EPD()
-
-    epd.init_fast()
-    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
-    draw = ImageDraw.Draw(image_to_draw)
-
-    timestr = time.strftime("%I:%M %p")
-    quote = get_current_time_quote()
-    draw_time(draw, timestr)
-    draw_quote(draw, quote)
-    draw_trains(draw)
-
-    epd.display(epd.getbuffer(image_to_draw))
-    epd.sleep()
-
-
-def partial_time_update():
-    epd = epd7in5_V2.EPD()
+    time.sleep(5)
 
     epd.init_part()
-    image_to_draw = Image.new('1', (epd.width, 50), 255)  # 255: clear the frame
+    partial_time_update(draw)
+    epd.display_Partial(epd.getbuffer(image_to_draw),0,0,epd.width,epd.height)
+    epd.sleep()
+    time.sleep(5)
+
+    epd.init()
+    image_to_draw = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(image_to_draw)
 
-    timestr = time.strftime("%I:%M %p")
-    draw_time(draw, timestr)
-
-    epd.display_Partial(epd.getbuffer(image_to_draw),0, 0, epd.width, 50)
-    epd.sleep()
-
-try:
-    
-    full_screen_update()
+    full_screen_update(draw)
+    epd.display(epd.getbuffer(image_to_draw))
     time.sleep(5)
 
-    partial_time_update()
-    time.sleep(5)
-
-    full_screen_update_fast()
     # partial update
 #     logging.info("5.show time")
 #     epd.init_part()
