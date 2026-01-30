@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # scheduler.py
 from concurrent.futures import thread
 import time
