@@ -12,16 +12,23 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 
 from train_status import get_arriving_trains
+from literature_clock import get_current_time_quote
 
 logging.basicConfig(level=logging.DEBUG)
 
 helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
 helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
-helvetica30 = ImageFont.truetype("resources/Helvetica Roman.ttf", 30)
 helvetica32 = ImageFont.truetype("resources/Helvetica Roman.ttf", 32)
-helvetica34 = ImageFont.truetype("resources/Helvetica Roman.ttf", 34)
 helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
+
+courier32 = ImageFont.truetype("resources/Courier New.ttf",32)
+courier40 = ImageFont.truetype("resources/Courier New.ttf",40)
+
+courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
+courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",40)
+
+courieritalic35 = ImageFont.truetype("resources/Courier New Italic.ttf",35)
 
 def text_size(text, font_type):
     left,top,right,bottom = font_type.getbbox(text)
@@ -89,7 +96,7 @@ def display_trains(draw):
 
     uptown_text = "Uptown:"
     [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
-    downtown_text = "Uptown:"
+    downtown_text = "Downtown:"
     [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
 
     if not uptown_trains:
@@ -131,6 +138,57 @@ def display_trains(draw):
 
     draw.line((0,line_y,800,line_y), fill=0)
 
+def draw_quote(draw, quote):
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 480
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)  # top 320px
+    PADDING_X = 50
+    PADDING_TOP = 30
+    max_width = SCREEN_WIDTH - 2 * PADDING_X  # 700px
+
+    quote_first = quote.get("quote_first") or ""
+    quote_time_case = quote.get("quote_time_case") or ""
+    quote_last = quote.get("quote_last") or ""
+
+    # Segments as (text, font) - split into words for wrapping
+    segments = [
+        (quote_first, courier40),
+        (quote_time_case, courierbold40),
+        (quote_last, courier40),
+    ]
+
+    # Build list of (word, font) tokens; add space after each word except possibly the last
+    tokens = []
+    for i, (text, font) in enumerate(segments):
+        words = text.split()
+        for j, word in enumerate(words):
+            is_last = i == len(segments) - 1 and j == len(words) - 1
+            tokens.append((word if is_last else word + " ", font))
+
+    x, y = PADDING_X, PADDING_TOP
+    line_height = 0
+
+    for word, font in tokens:
+        w, h = text_size(word, font)
+        line_height = max(line_height, h)
+
+        if x + w > PADDING_X + max_width and x > PADDING_X:
+            # Wrap to next line
+            x = PADDING_X
+            y += line_height
+            line_height = h
+
+        if y + h > PADDING_TOP + QUOTE_HEIGHT:
+            break  # Don't draw beyond quote area
+
+        draw.text((x, y), word, font=font, fill=0)
+        x += w
+
+    
+def draw_time(draw, timestr):
+    [timeWidth,timeHeight] = text_size(timestr, courierbold35)
+    draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
+
 try:
     logging.info("epd7in5_V2 Demo")
     epd = epd7in5_V2.EPD()
@@ -140,16 +198,15 @@ try:
     epd.Clear()
 
     epd.init_fast()
-    Himage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
-    draw = ImageDraw.Draw(Himage)
+    QuoteImage = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
+    QuoteDraw = ImageDraw.Draw(QuoteImage)
 
-    [timeWidth,timeHeight] = text_size("3:55PM", helvetica35)
-    draw.text((400 - (timeWidth/2),0), "3:55PM", font = helvetica35, fill = 0)   
-    draw.line((400,50,400,200), fill = 0)
+    timestr = time.strftime("%I:%M %p")
+    quote = get_current_time_quote()
+    draw_time(QuoteDraw, timestr)
+    draw_quote(QuoteDraw, quote)
 
-    add_train(draw,600,300,"D",5,21)
-
-    epd.display(epd.getbuffer(Himage))
+    epd.display(epd.getbuffer(QuoteImage))
     time.sleep(10)
 
 
