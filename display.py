@@ -24,7 +24,7 @@ helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
 helvetica31 = ImageFont.truetype("resources/Helvetica Roman.ttf", 31)
 
 courier18 = ImageFont.truetype("resources/Courier New.ttf", 18)
-courier22 = ImageFont.truetype("resources/Courier New.ttf", 22)
+courier22 = ImageFont.truetype("resources/Courier Medium.otf", 22)
 courier24 = ImageFont.truetype("resources/Courier New.ttf", 24)
 courier31 = ImageFont.truetype("resources/Courier New.ttf", 31)
 
@@ -91,7 +91,7 @@ def draw_trains(draw):
     padding = 5
     radius = 18
 
-    train2_y = 452
+    train2_y = 455
     train1_y = train2_y - (2*radius) - padding
 
     uptownX = 50
@@ -114,7 +114,7 @@ def draw_trains(draw):
     if not uptown_trains:
         draw.text((uptownX,train1_y + (nu_h/2)),no_uptown,font=helvetica24,fill=0)
     else:
-        draw.text((20, train1_y - radius - padding - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
+        draw.text((20, train1_y - radius - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
 
         for i, (route, mins) in enumerate(uptown_trains):
             if i == 0:
@@ -125,7 +125,7 @@ def draw_trains(draw):
     if not downtown_trains:
         draw.text((downtownX - nd_h,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
     else:
-        draw.text((downtownX - 30, train1_y - radius - padding - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
+        draw.text((downtownX - 30, train1_y - radius - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
 
         for i, (route, mins) in enumerate(downtown_trains):
             if i == 0:
