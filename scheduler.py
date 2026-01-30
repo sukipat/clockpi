@@ -122,8 +122,7 @@ async def scheduler():
 
 
 async def main():
-    loop = asyncio.get_running_loop()
-    install_signal_handlers(loop)
+    install_signal_handlers()
     await scheduler()
 
 
