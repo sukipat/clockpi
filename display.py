@@ -22,13 +22,13 @@ helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
 helvetica32 = ImageFont.truetype("resources/Helvetica Roman.ttf", 32)
 helvetica35 = ImageFont.truetype("resources/Helvetica Roman.ttf", 35)
 
-courier32 = ImageFont.truetype("resources/Courier New.ttf",32)
-courier40 = ImageFont.truetype("resources/Courier New.ttf",40)
+courier32 = ImageFont.truetype("resources/Courier New.ttf",30)
+courier40 = ImageFont.truetype("resources/Courier New.ttf",36)
 
 courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
-courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",40)
+courierbold40 = ImageFont.truetype("resources/Courier New Bold.ttf",36)
 
-courieritalic32 = ImageFont.truetype("resources/Courier New Italic.ttf",32)
+courieritalic32 = ImageFont.truetype("resources/Courier New Italic.ttf",30)
 
 def text_size(text, font_type):
     left,top,right,bottom = font_type.getbbox(text)
@@ -71,15 +71,14 @@ def display_trains(draw):
     TARGET_ROUTES = {"A", "C", "B", "D"}
     TARGET_STOP = "A15"
 
-    NUM_TRAINS = 3
+    NUM_TRAINS = 2
 
     arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
 
     padding = 5
     radius = 18
 
-    train3_y = 445
-    train2_y = train3_y - (2*radius) - padding
+    train2_y = 445
     train1_y = train2_y - (2*radius) - padding
 
     uptownX = 50
@@ -109,8 +108,6 @@ def display_trains(draw):
                 add_train(draw,uptownX,train1_y,route,mins,radius)
             if i == 1:
                 add_train(draw,uptownX,train2_y,route,mins,radius)
-            if i == 2:
-                add_train(draw,uptownX,train3_y,route,mins,radius)
 
     if not downtown_trains:
         draw.text((downtownX - nd_h,train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
@@ -122,8 +119,6 @@ def display_trains(draw):
                 add_train(draw,downtownX,train1_y,route,mins,radius)
             if i == 1:
                 add_train(draw,downtownX,train2_y,route,mins,radius)
-            if i == 2:
-                add_train(draw,downtownX,train3_y,route,mins,radius) 
 
     line_y = train1_y - radius - padding - max(uptown_h,downtown_h) - padding - padding
 
@@ -143,18 +138,20 @@ def draw_quote(draw, quote):
     SCREEN_HEIGHT = 480
     QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3)  # top 320px
     PADDING_X = 50
-    PADDING_TOP = 100
+    PADDING_TOP = 50
     max_width = SCREEN_WIDTH - 2 * PADDING_X  # 700px
     box_right = SCREEN_WIDTH - PADDING_X
     box_bottom = PADDING_TOP + QUOTE_HEIGHT
 
-    # Reserve bottom for title + author (right-aligned)
     title = quote.get("title") or ""
     author = quote.get("author") or ""
     [_, author_h] = text_size("X", courier32)
     [_, title_h] = text_size("X", courieritalic32)
-    attribution_height = (title_h + 5 + author_h) if (title or author) else 0
-    quote_text_bottom = box_bottom - attribution_height
+
+    # Fixed line height for equal vertical spacing (max of quote fonts)
+    [_, h40] = text_size("X", courier40)
+    [_, h40bold] = text_size("X", courierbold40)
+    quote_line_height = max(h40, h40bold)
 
     quote_first = quote.get("quote_first") or ""
     quote_time_case = quote.get("quote_time_case") or ""
@@ -176,34 +173,33 @@ def draw_quote(draw, quote):
             tokens.append((word if is_last else word + " ", font))
 
     x, y = PADDING_X, PADDING_TOP
-    line_height = 0
+    last_quote_line_bottom = PADDING_TOP
 
     for word, font in tokens:
         w, h = text_size(word, font)
-        line_height = max(line_height, h)
 
         if x + w > PADDING_X + max_width and x > PADDING_X:
             # Wrap to next line
             x = PADDING_X
-            y += line_height
-            line_height = h
+            y += quote_line_height
 
-        if y + h > quote_text_bottom:
+        if y + quote_line_height > box_bottom:
             break  # Don't draw beyond quote area
 
         draw.text((x, y), word, font=font, fill=0)
         x += w
+        last_quote_line_bottom = y + quote_line_height
 
-    # Title and author at bottom of box, right-aligned (title above author)
-    if author:
-        [author_w, _] = text_size(author, courier32)
-        author_y = box_bottom - author_h
-        draw.text((box_right - author_w, author_y), author, font=courier32, fill=0)
-
+    # Title 10px below last quote line, author below title; both right-aligned
     if title:
         [title_w, _] = text_size(title, courieritalic32)
-        title_y = box_bottom - title_h - (author_h + 5 if author else 0)
+        title_y = last_quote_line_bottom + 10
         draw.text((box_right - title_w, title_y), title, font=courieritalic32, fill=0)
+
+    if author:
+        [author_w, _] = text_size(author, courier32)
+        author_y = last_quote_line_bottom + 10 + (title_h + 5 if title else 0)
+        draw.text((box_right - author_w, author_y), author, font=courier32, fill=0)
 
     
 def draw_time(draw, timestr):
