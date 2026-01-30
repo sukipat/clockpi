@@ -18,6 +18,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 def full_display_update():
+    logging.info("Attempting full refresh")
     try:
         epd.init()
         screen_image = Image.new('1',(epd.width, epd.height),255)
@@ -34,6 +35,7 @@ def full_display_update():
         existing_image = screen_image
 
         epd.display(epd.getbuffer(screen_image))
+        logging.info("Closing connection after partial refresh")
         epd.sleep()
     except IOError as e:
         logging.info(e)
@@ -44,19 +46,33 @@ def full_display_update():
         exit()
 
 def partial_train_refresh():
+    logging.info("Attempting partial refresh")
     if not existing_draw or not existing_image:
-        full_display_update
+        full_display_update()
+        logging.info("No existing image found")
         return
 
-    existing_draw.rectangle((0,320,800,480), fill = 255)
-    draw_trains(existing_draw)
+    try:
+        existing_draw.rectangle((0,320,800,480), fill = 255)
+        draw_trains(existing_draw)
 
-    epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
-    epd.sleep()
+        epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
+        logging.info("Closing connection after partial refresh")
+        epd.sleep()
+
+    except IOError as e:
+        logging.info(e)
+        
+    except KeyboardInterrupt:    
+        logging.info("ctrl + c:")
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
+        exit()
 
 def run_scheduler():
     # Adjust max_workers based on how many overlaps you expect
     executor = ThreadPoolExecutor(max_workers=4)
+
+    full_display_update()
 
     while True:
         now = time.time()
@@ -66,7 +82,7 @@ def run_scheduler():
         time.sleep(max(0, next_minute - now))
 
         # Submit full update immediately
-        executor.submit(full_display_update)
+        executor.submit(full_display_update())
 
         # Sleep 30 seconds (scheduler thread only)
         time.sleep(30)
