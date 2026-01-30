@@ -1,6 +1,7 @@
 # scheduler.py
 import time
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
+import signal
 
 from waveshare_epd import epd7in5_V2
 from PIL import Image,ImageDraw,ImageFont
@@ -13,6 +14,9 @@ from draw_screen import get_current_time_quote
 epd = epd7in5_V2.EPD()
 existing_image = None
 existing_draw = None
+
+shutdown_event = asyncio.Event()
+
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -68,28 +72,59 @@ def partial_train_refresh():
         epd7in5_V2.epdconfig.module_exit(cleanup=True)
         exit()
 
-def run_scheduler():
-    # Adjust max_workers based on how many overlaps you expect
-    executor = ThreadPoolExecutor(max_workers=4)
+def install_signal_handlers():
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, shutdown_event.set)
 
-    full_display_update()
+async def scheduler():
+    tasks = set()
 
-    while True:
-        now = time.time()
+    try:
+        while not shutdown_event.is_set():
+            now = time.time()
+            next_minute = (int(now) // 60 + 1) * 60
 
-        # Align to next minute boundary
-        next_minute = (int(now) // 60 + 1) * 60
-        time.sleep(max(0, next_minute - now))
+            # Sleep until next minute boundary or shutdown
+            try:
+                await asyncio.wait_for(
+                    shutdown_event.wait(),
+                    timeout=max(0, next_minute - now),
+                )
+                break
+            except asyncio.TimeoutError:
+                pass
 
-        # Submit full update immediately
-        executor.submit(full_display_update())
+            # Schedule full update
+            task = asyncio.create_task(full_display_update())
+            tasks.add(task)
+            task.add_done_callback(tasks.discard)
 
-        # Sleep 30 seconds (scheduler thread only)
-        time.sleep(30)
+            # Wait 30 seconds or shutdown
+            try:
+                await asyncio.wait_for(shutdown_event.wait(), timeout=30)
+                break
+            except asyncio.TimeoutError:
+                pass
 
-        # Submit partial update
-        executor.submit(partial_train_refresh)
+            # Schedule partial update
+            task = asyncio.create_task(partial_train_refresh())
+            tasks.add(task)
+            task.add_done_callback(tasks.discard)
+
+    finally:
+        print("Shutdown requested — waiting for running tasks to finish...")
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        print("Scheduler stopped cleanly.")
+        epd.sleep()
+
+
+async def main():
+    loop = asyncio.get_running_loop()
+    install_signal_handlers(loop)
+    await scheduler()
 
 
 if __name__ == "__main__":
-    run_scheduler()
+    asyncio.run(main())
