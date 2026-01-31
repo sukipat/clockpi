@@ -246,11 +246,6 @@ def draw_quote(draw, quote):
     tokens = []
     for i, (text, font) in enumerate(segments):
         words = text.split()
-        if words:
-            if text[0] == " ":
-                words[0] = " " + words[0]
-            if text[-1] == " ":
-                words[-1] = words[-1] + " "
         for j, word in enumerate[str](words):
             is_last = i == len(segments) - 1 and j == len(words) - 1
             tokens.append((word if is_last else word + " ", font))
