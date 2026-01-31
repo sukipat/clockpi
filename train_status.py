@@ -120,9 +120,9 @@ def get_arriving_trains(URL, station, trains, train_count):
 	if feed["error"]:
 		e = feed["error"]
 		if e == "network":
-			error_code = "Network issue fetching "
+			error_code = "Network issue\nfetching "
 		else:
-			error_code = "Server issue fetching "
+			error_code = "Server issue\nfetching "
 
 	if feed["feed"]:
 		arrivals = _get_arrivals(feed["feed"],station, trains, train_count)

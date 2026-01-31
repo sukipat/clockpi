@@ -88,25 +88,25 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     train_text = train_text[:-3]
 
     if error_code:
-        error_label = error_code + train_text + "trains"
-        [error_w, error_h] = text_size(error_label,courier22)
-        draw.text((symbolX, top_train_y),error_label,font= courier22, fill = 0)
-        draw.text((symbolX + offsetX, top_train_y - (error_h/2)),error_label,font= courier22, fill = 0)
+        error_label = error_code + train_text
+        [error_w, error_h] = text_size(error_label,courier18)
+        draw.text((symbolX - 15, top_train_y),error_label,font= courier18, fill = 0)
+        draw.text((symbolX + offsetX - 15, top_train_y - (error_h/2)),error_label,font= courier18, fill = 0)
         return
 
     if not uptown_trains:
-        train_label = "No arriving " + train_text + "trains"
+        train_label = "No arriving " + train_text
         [label_w, label_h] = text_size(train_label,courier22)
-        draw.text((symbolX, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+        draw.text((symbolX - 15, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
     else:
         for i, (route, mins) in enumerate(uptown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
                 add_train(draw,symbolX,train_y,route,mins,radius)
 
     if not downtown_trains:
-        train_label = "No arriving " + train_text + "trains"
+        train_label = "No arriving\n" + train_text
         [label_w, label_h] = text_size(train_label,courier22)
-        draw.text((symbolX + offsetX, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+        draw.text((symbolX + offsetX - 15, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
     else:
         for i, (route, mins) in enumerate(downtown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
@@ -132,7 +132,7 @@ def draw_trains(draw):
     draw.text((20, 414 - 18 - 5 - uptown_h),uptown_text,font=helvetica24,fill=0)
     downtown_text = "Downtown:"
     [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
-    draw.text((660 - 30, 414 - 18 - 5 - uptown_h),downtown_text,font=helvetica24,fill=0)
+    draw.text((510 - 30, 414 - 18 - 5 - uptown_h),downtown_text,font=helvetica24,fill=0)
 
     draw_trains_for_line(ac_trains,AC_ROUTES,NUM_TRAINS,50,draw)
     draw_trains_for_line(bd_trains,BD_ROUTES,NUM_TRAINS,200,draw)
