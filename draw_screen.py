@@ -8,6 +8,7 @@ import time
 from PIL import Image,ImageDraw,ImageFont
 
 from train_status import get_arriving_trains
+from literature_clock import get_current_time_quote
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -71,11 +72,12 @@ def add_train(draw,x,y,train,min_away,rad):
     draw.text((distance_x,distance_y),distance_label,font=courier22, fill = 0)
 
 def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
-    top_train_y = 455 - ((train_count-1)*((2*radius) + padding))
-
     padding = 5
     radius = 18
     offsetX = 400
+
+    top_train_y = 455 - ((train_count-1)*((2*radius) + padding))
+
 
     uptown_trains = arriving_trains["uptown"]
     downtown_trains = arriving_trains["downtown"]
@@ -295,3 +297,31 @@ def draw_startup_status(draw, wifi_status):
     
     [status_width, status_height] = text_size(status_text, courierbold35)
     draw.text((400 - (status_width/2),320),status_text, font = courierbold35, fill = 0)
+
+def test_render():
+    try:
+        epd = epd7in5_V2.EPD()
+        epd.init_fast()
+        screen_image = Image.new('1',(epd.width, epd.height),255)
+        draw = ImageDraw.Draw(screen_image)
+
+        timestr = time.strftime("%I:%M %p")
+        quote = get_current_time_quote()
+
+        draw_time(draw, timestr)
+        draw_quote(draw, quote)
+        draw_trains(draw)
+
+        epd.display(epd.getbuffer(screen_image))
+        logging.info("Closing connection after full refresh")
+        epd.sleep()
+    except IOError as e:
+        logging.info(e)
+        
+    except KeyboardInterrupt:    
+        logging.info("ctrl + c:")
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
+        exit()
+
+if __name__ == "__main__":
+    test_render()
