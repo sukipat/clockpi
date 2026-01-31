@@ -88,17 +88,14 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     train_text = "\n" + train_text[:-4]
 
     if error_code:
-        if error_code == "Network error":
-            network_error = "Network not connected"
-            [network_w,network_h] = text_size(network_error,courier24)
-            draw.text((400 - (network_w/2),450 - network_h),network_error,font=courier24,fill=0)
-            return
-            
+        if error_code == "Network issue":
+            return False
+
         error_label = error_code + train_text
         [error_w, error_h] = text_size(error_label,courier18)
         draw.text((symbolX - 15, top_train_y),error_label,font= courier18, fill = 0)
         draw.text((symbolX + offsetX - 15, top_train_y - (error_h/2)),error_label,font= courier18, fill = 0)
-        return
+        return True
 
     if not uptown_trains:
         train_label = "No arriving " + train_text
@@ -118,6 +115,7 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
                 train_y = top_train_y + (i*((2*radius) + padding))
                 add_train(draw,symbolX + offsetX,train_y,route,mins,radius)
 
+    return True
     
 
 def draw_trains(draw):
@@ -133,6 +131,15 @@ def draw_trains(draw):
     ac_trains = get_arriving_trains(AC_FEED_URL,TARGET_STOP,AC_ROUTES,NUM_TRAINS)
     bd_trains = get_arriving_trains(BD_FEED_URL,TARGET_STOP,BD_ROUTES,NUM_TRAINS)
 
+    ac_network_status = draw_trains_for_line(ac_trains,AC_ROUTES,NUM_TRAINS,50,draw)
+    bd_network_status = draw_trains_for_line(bd_trains,BD_ROUTES,NUM_TRAINS,200,draw)
+
+    if not ac_network_status or not bd_network_status:
+        network_error = "Network not connected"
+        [network_w,network_h] = text_size(network_error,courier24)
+        draw.text((400 - (network_w/2),450 - network_h),network_error,font=courier24,fill=0)
+        return
+
     uptown_text = "Uptown:"
     [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
     draw.text((20, 414 - 18 - 5 - uptown_h),uptown_text,font=helvetica24,fill=0)
@@ -140,8 +147,7 @@ def draw_trains(draw):
     [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
     draw.text((510 - 30, 414 - 18 - 5 - uptown_h),downtown_text,font=helvetica24,fill=0)
 
-    draw_trains_for_line(ac_trains,AC_ROUTES,NUM_TRAINS,50,draw)
-    draw_trains_for_line(bd_trains,BD_ROUTES,NUM_TRAINS,200,draw)
+
 
 
 def _measure_quote_layout(quote, fonts, max_width):
