@@ -148,7 +148,7 @@ async def scheduler():
                 pass
 
             # Schedule full update
-            if counter == 4 or counter == -1:
+            if counter == 3 or counter == -1:
                 task = asyncio.create_task(asyncio.to_thread(full_display_update))
                 counter = 1
             else:
@@ -225,5 +225,5 @@ async def main():
     await scheduler()
 
 if __name__ == "__main__":
-    prepare()
+#    prepare()
     asyncio.run(main())

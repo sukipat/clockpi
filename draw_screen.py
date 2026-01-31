@@ -85,9 +85,15 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     train_text = ""
     for train in trains:
         train_text = train_text + train + " or "
-    train_text = train_text[:-3]
+    train_text = "\n" + train_text[:-4]
 
     if error_code:
+        if error_code == "Network error":
+            network_error = "Network not connected"
+            [network_w,network_h] = text_size(network_error,courier24)
+            draw.text((400 - (network_w/2),450 - network_h),network_error,font=courier24,fill=0)
+            return
+            
         error_label = error_code + train_text
         [error_w, error_h] = text_size(error_label,courier18)
         draw.text((symbolX - 15, top_train_y),error_label,font= courier18, fill = 0)
