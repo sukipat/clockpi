@@ -111,36 +111,23 @@ def _print_arrivals(arrivals):
 #	"uptown" (List of tuples): route_id (String) and minutes_away (Int)
 #	"downtown" (List of tuples): route_id (String) and minutes_away (Int)
 #	"error" (String): None or String to print to represent error
-def get_arriving_trains(URLS, station, trains, train_count):
-	feeds = []
-	error_code = None
-
-	for url in URLS:
-		feed = _fetch_feed(url)
-		if feed["error"]:
-			e = feed["error"]
-			if e == "network":
-				error_code = "Network connection issue,\nsome trains may not be displayed"
-				continue
-			else:
-				error_code = "Issue fetching feed,\nsome trains may not be displayed"
-				continue
-		feeds.append(feed)
-
-	arrivals = []
-	for feed in feeds:
-		arrival = _get_arrivals(feed["feed"],station, trains, train_count)
-		arrivals.append(arrival)
-
-
+def get_arriving_trains(URL, station, trains, train_count):
 	uptown_arrivals = []
 	downtown_arrivals = []
-	for arrival in arrivals:
-		uptown_arrivals = uptown_arrivals + arrival[0]
-		downtown_arrivals = downtown_arrivals + arrival[1]
+	error_code = None
 
-	uptown_arrivals.sort(key=lambda x: x[1])
-	downtown_arrivals.sort(key=lambda x: x[1])
+	feed = _fetch_feed(URL)
+	if feed["error"]:
+		e = feed["error"]
+		if e == "network":
+			error_code = "Network issue fetching "
+		else:
+			error_code = "Server issue fetching "
+
+	if feed["feed"]:
+		arrivals = _get_arrivals(feed["feed"],station, trains, train_count)
+		uptown_arrivals = arrivals[0]
+		downtown_arrivals = arrivals[1]
 
 	return {"uptown": uptown_arrivals[:train_count], "downtown": downtown_arrivals[:train_count], "error": error_code}
 
@@ -149,32 +136,47 @@ def main():
 
 	AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
 	BD_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
-	FEED_URLS = [AC_FEED_URL, BD_FEED_URL]
 
-	TARGET_ROUTES = {"A", "C", "B", "D"}
+	AC_ROUTES = ["A", "C"]
+	BD_ROUTES = ["B", "D"]
 	TARGET_STOP = "A15"
 
-	NUM_TRAINS = 4
+	NUM_TRAINS = 2
 	
-	arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
+	ac_trains = get_arriving_trains(AC_FEED_URL,TARGET_STOP,AC_ROUTES,NUM_TRAINS)
+	bd_trains = get_arriving_trains(BD_FEED_URL,TARGET_STOP,BD_ROUTES,NUM_TRAINS)
 
-	if arriving_trains["error"]:
-		print(arriving_trains["error"])
+	if ac_trains["error"]:
+		print(ac_trains["error"])
 
-	uptown_trains = arriving_trains["uptown"]
-	downtown_trains = arriving_trains["downtown"]
+	ac_uptown_trains = ac_trains["uptown"]
+	ac_downtown_trains = ac_trains["downtown"]
+
+	if bd_trains["error"]:
+		print(bd_trains["error"])
+
+	bd_uptown_trains = bd_trains["uptown"]
+	bd_downtown_trains = bd_trains["downtown"]
 
 	print("\n" + "Uptown Arrivals:")
-	if not uptown_trains:
-		print("No arrivals soon...")
+	if not ac_uptown_trains:
+		print("No A or C arrivals soon...")
 	else:
-		_print_arrivals(uptown_trains)
+		_print_arrivals(ac_uptown_trains)
+	if not bd_uptown_trains:
+		print("No B or D arrivals soon...")
+	else:
+		_print_arrivals(bd_uptown_trains)
 
 	print("\n" + "Downtown Arrivals:")
-	if not downtown_trains:
-		print("No arrivals soon...")
+	if not ac_downtown_trains:
+		print("No A or C arrivals soon...")
 	else:
-		_print_arrivals(downtown_trains)
+		_print_arrivals(ac_downtown_trains)
+	if not bd_downtown_trains:
+		print("No B or D arrivals soon...")
+	else:
+		_print_arrivals(bd_downtown_trains)
 
 if __name__ == "__main__":
 	main()

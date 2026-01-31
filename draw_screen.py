@@ -44,7 +44,7 @@ def text_size(text, font_type):
     height = bottom - top
     return [width, height]
 
-def add_train(draw,x,y,train,min_away, rad):
+def add_train(draw,x,y,train,min_away,rad):
     radius = rad
    
     x1 = x - radius
@@ -61,84 +61,81 @@ def add_train(draw,x,y,train,min_away, rad):
 
     distance_label = ""
     if min_away == 0:
-        distance_label = "<1 min away"
+        distance_label = "<1 min"
     else:
-        distance_label = str(min_away) + " min away"
+        distance_label = str(min_away) + " min"
 
     [distance_width, distance_height] = text_size(distance_label,courier22)
     distance_x = x + radius + 10
     distance_y = y - (distance_height/2) + 2
     draw.text((distance_x,distance_y),distance_label,font=courier22, fill = 0)
 
+def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
+    top_train_y = 455 - ((train_count-1)*((2*radius) + padding))
+
+    padding = 5
+    radius = 18
+    offsetX = 400
+
+    uptown_trains = arriving_trains["uptown"]
+    downtown_trains = arriving_trains["downtown"]
+    error_code = arriving_trains["error"]
+
+    train_text = ""
+    for train in trains:
+        train_text = train_text + train + " or "
+    train_text = train_text[:-3]
+
+    if error_code:
+        error_label = error_code + train_text + "trains"
+        [error_w, error_h] = text_size(error_label,courier22)
+        draw.text((symbolX, top_train_y),error_label,font= courier22, fill = 0)
+        draw.text((symbolX + offsetX, top_train_y - (error_h/2)),error_label,font= courier22, fill = 0)
+        return
+
+    if not uptown_trains:
+        train_label = "No arriving " + train_text + "trains"
+        [label_w, label_h] = text_size(train_label,courier22)
+        draw.text((symbolX, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+    else:
+        for i, (route, mins) in enumerate(uptown_trains):
+                train_y = top_train_y + (i*((2*radius) + padding))
+                add_train(draw,symbolX,train_y,route,mins,radius)
+
+    if not downtown_trains:
+        train_label = "No arriving " + train_text + "trains"
+        [label_w, label_h] = text_size(train_label,courier22)
+        draw.text((symbolX + offsetX, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+    else:
+        for i, (route, mins) in enumerate(downtown_trains):
+                train_y = top_train_y + (i*((2*radius) + padding))
+                add_train(draw,symbolX + offsetX,train_y,route,mins,radius)
+
+    
+
 def draw_trains(draw):
     AC_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
     BD_FEED_URL="https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
-    FEED_URLS = [AC_FEED_URL, BD_FEED_URL]
 
-    TARGET_ROUTES = {"A", "C", "B", "D"}
+    AC_ROUTES = ["A", "C"]
+    BD_ROUTES = ["B", "D"]
     TARGET_STOP = "A15"
 
     NUM_TRAINS = 2
 
-    arriving_trains = get_arriving_trains(FEED_URLS,TARGET_STOP,TARGET_ROUTES,NUM_TRAINS)
+    ac_trains = get_arriving_trains(AC_FEED_URL,TARGET_STOP,AC_ROUTES,NUM_TRAINS)
+    bd_trains = get_arriving_trains(BD_FEED_URL,TARGET_STOP,BD_ROUTES,NUM_TRAINS)
 
     padding = 5
-    radius = 18
-
-    train2_y = 455
-    train1_y = train2_y - (2*radius) - padding
-
-    uptownX = 50
-    downtownX = 600
-
-
-    uptown_trains = arriving_trains["uptown"]
-    downtown_trains = arriving_trains["downtown"]
-
-    no_uptown = "No uptown arrivals soon..."
-    [nu_w,nu_h] = text_size(no_uptown,helvetica24)
-    no_downtown = "No downtown arrivals soon..."
-    [nd_w,nd_h] = text_size(no_downtown,helvetica24)
 
     uptown_text = "Uptown:"
     [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
     downtown_text = "Downtown:"
     [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
 
-    if not uptown_trains:
-        draw.text((uptownX,train1_y + (nu_h/2)),no_uptown,font=helvetica24,fill=0)
-    else:
-        draw.text((20, train1_y - radius - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
+    draw_trains_for_line(ac_trains,AC_ROUTES,NUM_TRAINS,50,draw)
+    draw_trains_for_line(bd_trains,BD_ROUTES,NUM_TRAINS,200,draw)
 
-        for i, (route, mins) in enumerate(uptown_trains):
-            if i == 0:
-                add_train(draw,uptownX,train1_y,route,mins,radius)
-            if i == 1:
-                add_train(draw,uptownX,train2_y,route,mins,radius)
-
-    if not downtown_trains:
-        draw.text((downtownX - (nd_w/2),train1_y + (nd_h/2)),no_downtown,font=helvetica24,fill=0)
-    else:
-        draw.text((downtownX - 30, train1_y - radius - padding - uptown_h),downtown_text,font=helvetica24,fill=0)
-
-        for i, (route, mins) in enumerate(downtown_trains):
-            if i == 0:
-                add_train(draw,downtownX,train1_y,route,mins,radius)
-            if i == 1:
-                add_train(draw,downtownX,train2_y,route,mins,radius)
-
-    line_y = train1_y - radius - padding - max(uptown_h,downtown_h) - padding - padding
-
-    # station_label = "125th Street"
-    # [station_width, station_height] = text_size(station_label,helvetica22)
-    # draw.text((20,line_y - station_height - 3),station_label,font = helvetica22, fill = 0)
-
-    if arriving_trains["error"]:
-        error_msg = arriving_trains["error"]
-        [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((490 - (error_width/2),line_y+error_height),error_msg,font = helvetica18, fill = 0)
-
-    # draw.line((0,line_y,800,line_y), fill=0)
 
 def _measure_quote_layout(quote, fonts, max_width):
     """Measure total height of quote layout (no drawing). Returns (height, layout_info)."""
