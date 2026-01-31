@@ -137,7 +137,7 @@ def draw_trains(draw):
     if not ac_network_status or not bd_network_status:
         network_error = "Network not connected"
         [network_w,network_h] = text_size(network_error,courier22)
-        draw.text((400 - (network_w/2),410 - network_h),network_error,font=courier22,fill=0)
+        draw.text((400 - (network_w/2),460 - network_h),network_error,font=courier22,fill=0)
         return
 
     uptown_text = "Uptown:"
@@ -248,7 +248,9 @@ def draw_quote(draw, quote):
         words = text.split()
         for j, word in enumerate(words):
             is_last = i == len(segments) - 1 and j == len(words) - 1
-            tokens.append((word if is_last else word + " ", font))
+            # tokens.append((word if is_last else word + " ", font))
+            tokens.append((word, font))
+
 
     x, y = PADDING_X, PADDING_TOP
     last_quote_line_bottom = PADDING_TOP
