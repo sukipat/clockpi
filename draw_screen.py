@@ -136,8 +136,8 @@ def draw_trains(draw):
 
     if not ac_network_status or not bd_network_status:
         network_error = "Network not connected"
-        [network_w,network_h] = text_size(network_error,courier24)
-        draw.text((400 - (network_w/2),450 - network_h),network_error,font=courier24,fill=0)
+        [network_w,network_h] = text_size(network_error,courier22)
+        draw.text((400 - (network_w/2),410 - network_h),network_error,font=courier22,fill=0)
         return
 
     uptown_text = "Uptown:"
@@ -297,14 +297,12 @@ def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
     draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
-def draw_startup_status(draw, wifi_status):
-    startup_text = "Starting Up..."
+def draw_splashscreen(draw):
+    startup_text = "Happy Birthday!"
     [startup_width, startup_height] = text_size(startup_text,courierbold50)
     draw.text((400 - (startup_width/2),120), startup_text, font = courierbold50, fill = 0)
 
-    status_text = "Wifi Connected!"
-    if not wifi_status:
-        status_text = "Connecting Wifi"
+    status_text = "Starting up..."
     
     [status_width, status_height] = text_size(status_text, courierbold35)
     draw.text((400 - (status_width/2),320),status_text, font = courierbold35, fill = 0)
