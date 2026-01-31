@@ -136,7 +136,7 @@ def draw_trains(draw):
     if arriving_trains["error"]:
         error_msg = arriving_trains["error"]
         [error_width, error_height] = text_size(error_msg, helvetica18)
-        draw.text((500 - (error_width/2),line_y+error_height),error_msg,font = helvetica18, fill = 0)
+        draw.text((490 - (error_width/2),line_y+error_height),error_msg,font = helvetica18, fill = 0)
 
     # draw.line((0,line_y,800,line_y), fill=0)
 
