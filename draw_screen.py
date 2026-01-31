@@ -74,16 +74,9 @@ def add_train(draw,x,y,train,min_away,rad):
 def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     padding = 5
     radius = 18
-    offsetX = 400
+    offsetX = 460
 
     top_train_y = 455 - ((train_count-1)*((2*radius) + padding))
-
-    uptown_text = "Uptown:"
-    [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
-    draw.text((20, top_train_y - radius - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
-    downtown_text = "Downtown:"
-    [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
-    draw.text((20, top_train_y - radius - padding - uptown_h),uptown_text,font=helvetica24,fill=0)
 
     uptown_trains = arriving_trains["uptown"]
     downtown_trains = arriving_trains["downtown"]
@@ -133,6 +126,13 @@ def draw_trains(draw):
 
     ac_trains = get_arriving_trains(AC_FEED_URL,TARGET_STOP,AC_ROUTES,NUM_TRAINS)
     bd_trains = get_arriving_trains(BD_FEED_URL,TARGET_STOP,BD_ROUTES,NUM_TRAINS)
+
+    uptown_text = "Uptown:"
+    [uptown_w, uptown_h] = text_size(uptown_text, helvetica24)
+    draw.text((20, 414 - 18 - 5 - uptown_h),uptown_text,font=helvetica24,fill=0)
+    downtown_text = "Downtown:"
+    [downtown_w, downtown_h] = text_size(downtown_text, helvetica24)
+    draw.text((660 - 30, 414 - 18 - 5 - uptown_h),downtown_text,font=helvetica24,fill=0)
 
     draw_trains_for_line(ac_trains,AC_ROUTES,NUM_TRAINS,50,draw)
     draw_trains_for_line(bd_trains,BD_ROUTES,NUM_TRAINS,200,draw)
