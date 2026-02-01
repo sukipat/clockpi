@@ -184,7 +184,10 @@ def prepare():
     screen_image = Image.new('1',(epd.width, epd.height),255)
     draw = ImageDraw.Draw(screen_image)
 
-    draw_splashscreen(draw)
+    # draw_splashscreen(draw)
+    bmp = Image.open("resources/central_park.bmp")
+    screen_image.paste(bmp, (800,480))
+    epd.display(epd.getbuffer(screen_image))
 
     epd.display(epd.getbuffer(screen_image))
     epd.sleep()
