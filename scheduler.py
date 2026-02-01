@@ -180,18 +180,25 @@ async def scheduler():
 
 
 def prepare():
-    epd.init()
-    screen_image = Image.new('1',(epd.width, epd.height),255)
-    draw = ImageDraw.Draw(screen_image)
+    try:
+        epd.init()
+        screen_image = Image.new('1',(epd.width, epd.height),255)
+        draw = ImageDraw.Draw(screen_image)
 
-    # draw_splashscreen(draw)
-    bmp = Image.open("resources/central_park.bmp")
-    screen_image.paste(bmp, (800,480))
-    epd.display(epd.getbuffer(screen_image))
+        # draw_splashscreen(draw)
+        bmp = Image.open("resources/central_park.bmp")
+        screen_image.paste(bmp, (800,480))
+        epd.display(epd.getbuffer(screen_image))
 
-    epd.display(epd.getbuffer(screen_image))
-    epd.sleep()
-
+        epd.display(epd.getbuffer(screen_image))
+        epd.sleep()
+    except IOError as e:
+        logging.info(e)
+        
+    except KeyboardInterrupt:    
+        logging.info("ctrl + c:")
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
+        exit()
 
 async def main():
     install_signal_handlers()
@@ -199,4 +206,4 @@ async def main():
 
 if __name__ == "__main__":
     prepare()
-    asyncio.run(main())
+#    asyncio.run(main())
