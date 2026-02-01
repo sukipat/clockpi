@@ -185,12 +185,15 @@ def prepare():
         screen_image = Image.new('1',(epd.width, epd.height),255)
         draw = ImageDraw.Draw(screen_image)
 
-        # draw_splashscreen(draw)
         bmp = Image.open("resources/central_park.bmp")
-        screen_image.paste(bmp, (800,480))
-        epd.display(epd.getbuffer(screen_image))
+        screen_image.paste(bmp, (0,0))
+        draw_splashscreen(draw)
 
         epd.display(epd.getbuffer(screen_image))
+
+        time.sleep(10)
+        epd.Clear()
+
         epd.sleep()
     except IOError as e:
         logging.info(e)
@@ -206,4 +209,4 @@ async def main():
 
 if __name__ == "__main__":
     prepare()
-#    asyncio.run(main())
+    asyncio.run(main())

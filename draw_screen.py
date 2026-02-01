@@ -301,12 +301,12 @@ def draw_time(draw, timestr):
 def draw_splashscreen(draw):
     startup_text = "Happy Birthday!"
     [startup_width, startup_height] = text_size(startup_text,courierbold50)
-    draw.text((400 - (startup_width/2),120), startup_text, font = courierbold50, fill = 0)
+    draw.text((400 - (startup_width/2),10), startup_text, font = courierbold50, fill = 0)
 
     status_text = "Starting up..."
     
     [status_width, status_height] = text_size(status_text, courierbold35)
-    draw.text((400 - (status_width/2),320),status_text, font = courierbold35, fill = 0)
+    draw.text((400 - (status_width/2),10 + startup_height + 20),status_text, font = courierbold35, fill = 0)
 
 def test_render():
     try:
