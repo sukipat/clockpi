@@ -190,10 +190,6 @@ def prepare():
         draw_splashscreen(draw)
 
         epd.display(epd.getbuffer(screen_image))
-
-        time.sleep(10)
-        epd.Clear()
-
         epd.sleep()
     except IOError as e:
         logging.info(e)
