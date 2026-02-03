@@ -296,7 +296,7 @@ def draw_quote(draw, quote):
 
 def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
-    draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
+    draw.text((400 - (timeWidth/2),10), timestr, font = courierbold35, fill = 0)
 
 def draw_splashscreen(draw):
     startup_text = "Happy Birthday!"
