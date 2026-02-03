@@ -41,3 +41,12 @@ try:
     logging.info("Clear...")
     epd.init()
     epd.Clear()
+
+
+except IOError as e:
+    logging.info(e)
+    
+except KeyboardInterrupt:    
+    logging.info("ctrl + c:")
+    epd7in5_V2.epdconfig.module_exit(cleanup=True)
+    exit()
