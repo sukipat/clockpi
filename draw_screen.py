@@ -28,13 +28,13 @@ courierbold50 = ImageFont.truetype("resources/Courier New Bold.ttf",50)
 # Font paths for dynamic sizing
 COURIER_PATH = "resources/Courier New.ttf"
 COURIER_BOLD_PATH = "resources/Courier New Bold.ttf"
-COURIER_ITALIC_PATH = "resources/Courier New Italic.ttf"
+COURIER_ITALIC_PATH = "resources/Courier New Bold Italic.ttf"
 
 def _quote_fonts(size):
     """Create quote, title, author fonts at given sizes. Title/author use 0.8x."""
     return {
         "quote": ImageFont.truetype(COURIER_PATH, size),
-        "quote_bold": ImageFont.truetype(COURIER_BOLD_PATH, size),
+        "quote_bold": ImageFont.truetype(COURIER_BOLD_PATH, int(size*1.1)),
         "title": ImageFont.truetype(COURIER_ITALIC_PATH, max(12, int(size * 0.8))),
         "author": ImageFont.truetype(COURIER_PATH, max(12, int(size * 0.8))),
     }
@@ -296,7 +296,7 @@ def draw_quote(draw, quote):
 
 def draw_time(draw, timestr):
     [timeWidth,timeHeight] = text_size(timestr, courierbold35)
-    draw.text((400 - (timeWidth/2),10), timestr, font = courierbold35, fill = 0)
+    draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
 
 def draw_splashscreen(draw):
     startup_text = "Happy Birthday!"
