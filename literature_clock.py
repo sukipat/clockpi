@@ -8,7 +8,6 @@ def get_current_time_quote():
     now = datetime.now()
     filepath = f"times/{now.hour:02d}_{now.minute:02d}.json"
 
-    print(filepath)
     if not os.path.exists(filepath):
         return {
             "quote_first": None,
