@@ -206,8 +206,8 @@ def _measure_quote_layout(quote, fonts, max_width):
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
-    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3) - 10
-    PADDING_X = 50
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3) - 25
+    PADDING_X = 30
     PADDING_TOP = 50
     max_width = SCREEN_WIDTH - 2 * PADDING_X
     box_right = SCREEN_WIDTH - PADDING_X
@@ -244,6 +244,27 @@ def draw_quote(draw, quote):
         words = text.split()
         for j, word in enumerate[str](words):
             is_last = i == len(segments) - 1 and j == len(words) - 1
+            if i == 1:
+                logging.info("on the time quote!")
+                last_words = segments[2][0]
+                if not last_words:
+                    last_word = last_words[0]
+                    if last_word == ".":
+                        is_last = True
+                    elif last_word == ",":
+                        is_last = True
+                    elif last_word == ":":
+                        is_last = True
+                    elif last_word == ";":
+                        is_last = True
+                    elif last_word == "\"":
+                        is_last = True
+                    elif last_word == "!":
+                        is_last = True
+                    elif last_word == "?":
+                        is_last = True
+                    elif last_word == ")":
+                        is_last = True
             tokens.append((word if is_last else word + " ", font))
 
 
