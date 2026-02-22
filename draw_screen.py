@@ -206,7 +206,7 @@ def _measure_quote_layout(quote, fonts, max_width):
 def draw_quote(draw, quote):
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
-    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3) - 5
+    QUOTE_HEIGHT = int(SCREEN_HEIGHT * 2 / 3) - 10
     PADDING_X = 50
     PADDING_TOP = 50
     max_width = SCREEN_WIDTH - 2 * PADDING_X
