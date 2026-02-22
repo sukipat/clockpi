@@ -244,10 +244,9 @@ def draw_quote(draw, quote):
         words = text.split()
         for j, word in enumerate[str](words):
             is_last = i == len(segments) - 1 and j == len(words) - 1
-            if i == 1:
-                logging.info("on the time quote!")
-                last_words = segments[2][0]
-                if not last_words:
+            if i == 1 and j == len(words) - 1:
+                last_words = segments[2][0].split()
+                if last_words:
                     last_word = last_words[0]
                     if last_word == ".":
                         is_last = True
