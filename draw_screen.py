@@ -16,10 +16,10 @@ helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
 helvetica31 = ImageFont.truetype("resources/Helvetica Roman.ttf", 31)
 
 courier18 = ImageFont.truetype("resources/Courier New.ttf", 18)
-helvetica22 = ImageFont.truetype("resources/Courier Medium.otf", 22)
+helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 
-courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
-courierbold50 = ImageFont.truetype("resources/Courier New Bold.ttf",50)
+centurybold35 = ImageFont.truetype("resources/Century Bold.ttf",35)
+centurybold50 = ImageFont.truetype("resources/Century Bold.ttf",50)
 
 # Font paths for dynamic sizing
 COURIER_PATH = "resources/Century.ttf"
@@ -291,18 +291,18 @@ def draw_quote(draw, quote):
         draw.text((box_right - author_w, title_y), author, font=af, fill=0)
 
 def draw_time(draw, timestr):
-    [timeWidth,timeHeight] = text_size(timestr, courierbold35)
-    draw.text((400 - (timeWidth/2),0), timestr, font = courierbold35, fill = 0)
+    [timeWidth,timeHeight] = text_size(timestr, centurybold35)
+    draw.text((400 - (timeWidth/2),0), timestr, font = centurybold35, fill = 0)
 
 def draw_splashscreen(draw):
     startup_text = "Happy Birthday!"
-    [startup_width, startup_height] = text_size(startup_text,courierbold50)
-    draw.text((400 - (startup_width/2),10), startup_text, font = courierbold50, fill = 0)
+    [startup_width, startup_height] = text_size(startup_text,centurybold50)
+    draw.text((400 - (startup_width/2),10), startup_text, font = centurybold50, fill = 0)
 
     status_text = "Starting up..."
     
-    [status_width, status_height] = text_size(status_text, courierbold35)
-    draw.text((400 - (status_width/2),10 + startup_height + 20),status_text, font = courierbold35, fill = 0)
+    [status_width, status_height] = text_size(status_text, centurybold35)
+    draw.text((400 - (status_width/2),10 + startup_height + 20),status_text, font = centurybold35, fill = 0)
 
 def test_render():
     try:
