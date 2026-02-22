@@ -12,23 +12,19 @@ from literature_clock import get_current_time_quote
 
 logging.basicConfig(level=logging.DEBUG)
 
-helvetica18 = ImageFont.truetype("resources/Helvetica Roman.ttf", 18)
-helvetica22 = ImageFont.truetype("resources/Helvetica Roman.ttf", 22)
 helvetica24 = ImageFont.truetype("resources/Helvetica Roman.ttf", 24)
 helvetica31 = ImageFont.truetype("resources/Helvetica Roman.ttf", 31)
 
 courier18 = ImageFont.truetype("resources/Courier New.ttf", 18)
-courier22 = ImageFont.truetype("resources/Courier Medium.otf", 22)
-courier24 = ImageFont.truetype("resources/Courier New.ttf", 24)
-courier31 = ImageFont.truetype("resources/Courier New.ttf", 31)
+helvetica22 = ImageFont.truetype("resources/Courier Medium.otf", 22)
 
 courierbold35 = ImageFont.truetype("resources/Courier New Bold.ttf",35)
 courierbold50 = ImageFont.truetype("resources/Courier New Bold.ttf",50)
 
 # Font paths for dynamic sizing
-COURIER_PATH = "resources/Courier New.ttf"
-COURIER_BOLD_PATH = "resources/Courier New Bold.ttf"
-COURIER_ITALIC_PATH = "resources/Courier New Bold Italic.ttf"
+COURIER_PATH = "resources/Century.ttf"
+COURIER_BOLD_PATH = "resources/Century Bold.ttf"
+COURIER_ITALIC_PATH = "resources/Century Bold Italic.otf"
 
 def _quote_fonts(size):
     """Create quote, title, author fonts at given sizes. Title/author use 0.8x."""
@@ -66,10 +62,10 @@ def add_train(draw,x,y,train,min_away,rad):
     else:
         distance_label = str(min_away) + " min"
 
-    [distance_width, distance_height] = text_size(distance_label,courier22)
+    [distance_width, distance_height] = text_size(distance_label,helvetica22)
     distance_x = x + radius + 10
     distance_y = y - (distance_height/2) + 2
-    draw.text((distance_x,distance_y),distance_label,font=courier22, fill = 0)
+    draw.text((distance_x,distance_y),distance_label,font=helvetica22, fill = 0)
 
 def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     padding = 5
@@ -99,8 +95,8 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
 
     if not uptown_trains:
         train_label = "No arriving " + train_text
-        [label_w, label_h] = text_size(train_label,courier22)
-        draw.text((symbolX - 15, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+        [label_w, label_h] = text_size(train_label,helvetica22)
+        draw.text((symbolX - 15, top_train_y - (top_train_y/2)),error_label,font= helvetica22, fill = 0)
     else:
         for i, (route, mins) in enumerate(uptown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
@@ -108,8 +104,8 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
 
     if not downtown_trains:
         train_label = "No arriving\n" + train_text
-        [label_w, label_h] = text_size(train_label,courier22)
-        draw.text((symbolX + offsetX - 15, top_train_y - (top_train_y/2)),error_label,font= courier22, fill = 0)
+        [label_w, label_h] = text_size(train_label,helvetica22)
+        draw.text((symbolX + offsetX - 15, top_train_y - (top_train_y/2)),error_label,font= helvetica22, fill = 0)
     else:
         for i, (route, mins) in enumerate(downtown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
@@ -136,8 +132,8 @@ def draw_trains(draw):
 
     if not ac_network_status or not bd_network_status:
         network_error = "Network not connected"
-        [network_w,network_h] = text_size(network_error,courier22)
-        draw.text((400 - (network_w/2),460 - network_h),network_error,font=courier22,fill=0)
+        [network_w,network_h] = text_size(network_error,helvetica22)
+        draw.text((400 - (network_w/2),460 - network_h),network_error,font=helvetica22,fill=0)
         return
 
     uptown_text = "Uptown:"
@@ -219,7 +215,7 @@ def draw_quote(draw, quote):
     available_height = QUOTE_HEIGHT
 
     # Find largest font size that fits
-    FONT_SIZES = [40, 36, 32, 28, 24, 20, 18, 16, 14, 12]
+    FONT_SIZES = [40, 36, 32, 28, 24, 20, 18, 16, 14, 12, 10, 8]
     fonts = None
     for size in FONT_SIZES:
         f = _quote_fonts(size)
