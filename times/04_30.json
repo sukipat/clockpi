@@ -1,6 +1,16 @@
 [
   {
     "time": "04:30",
+    "quote_first": "It was ",
+    "quote_time_case": "4:30",
+    "quote_last": " Thanksgiving morning, and sunrise was still a long way off. New York was mostly deserted, except for police officers, parade workers, and insomniacs.",
+    "title": "Freeing Thanksgiving from My Family",
+    "author": "Jennifer Finney Boylan",
+    "sfw": "yes"
+},
+  
+  {
+    "time": "04:30",
     "quote_first": "He cannot leave. Most likely, he’ll never leave. Bram finds his way back to the chair and settles in. Outside, a bird cries out as the moon comes and goes behind thick clouds. He retrieves the pocket watch from his coat and curses. He forgot to wind it, and the hands ceased their journey at ",
     "quote_time_case": "4:30",
     "quote_last": ". He stuffs it back into his pocket.",
@@ -37,7 +47,7 @@
   },
   {
     "time": "04:30",
-    "quote_first": "𝘛𝘩𝘦𝘯 𝘸𝘩𝘺 𝘯𝘰𝘵 𝘥𝘦𝘴𝘤𝘳𝘪𝘣𝘦 𝘵𝘩𝘪𝘴 “𝘤𝘺𝘤𝘭𝘦”?If you wish. A server is woken at hour ",
+    "quote_first": "𝘛𝘩𝘦𝘯 𝘸𝘩𝘺 𝘯𝘰𝘵 𝘥𝘦𝘴𝘤𝘳𝘪𝘣𝘦 𝘵𝘩𝘪𝘴 “𝘤𝘺𝘤𝘭𝘦”? If you wish. A server is woken at hour ",
     "quote_time_case": "four-thirty",
     "quote_last": " by stimulin in the airflow, then yellow-up in our dormroom. After a minute in the hygiener and steamer, we put on fresh uniforms before filing into the restaurant.",
     "title": "Cloud Atlas",
