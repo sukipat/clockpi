@@ -247,7 +247,7 @@ def draw_quote(draw, quote):
             if i == 1 and j == len(words) - 1:
                 last_words = segments[2][0].split()
                 if last_words:
-                    last_word = last_words[0]
+                    last_word = last_words[0][:1]
                     if last_word == ".":
                         is_last = True
                     elif last_word == ",":
