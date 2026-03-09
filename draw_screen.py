@@ -264,6 +264,10 @@ def draw_quote(draw, quote):
                         is_last = True
                     elif last_word == ")":
                         is_last = True
+                    elif last_word == "—":
+                        is_last = True
+                    elif last_word == "-":
+                        is_last = True
             tokens.append((word if is_last else word + " ", font))
 
 
