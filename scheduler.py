@@ -49,15 +49,27 @@ def full_display_update():
             existing_image = screen_image
 
             epd.display(epd.getbuffer(screen_image))
-            logging.info("Closing connection after full refresh")
-            epd.sleep()
         except IOError as e:
             logging.info(e)
-            
-        except KeyboardInterrupt:    
+
+        except KeyboardInterrupt:
             logging.info("ctrl + c:")
             epd7in5_V2.epdconfig.module_exit(cleanup=True)
             exit()
+
+        except Exception:
+            # A bug anywhere in the draw path (e.g. bad data from an
+            # upstream feed) must not leave the panel mid-transaction —
+            # that's what caused it to freeze/stay on the splash screen
+            # in the past. Log it and fall through to the sleep below.
+            logging.exception("Unexpected error during full display update")
+
+        finally:
+            try:
+                epd.sleep()
+                logging.info("Closing connection after full refresh")
+            except Exception:
+                logging.exception("Failed to put EPD to sleep after full refresh")
 
 def partial_screen_refresh():
     global existing_draw, existing_image
@@ -74,7 +86,7 @@ def partial_screen_refresh():
             epd.init_part()
 
             existing_draw.rectangle((0,0,epd.width,epd.height), fill = 255)
-            
+
             timestr = time.strftime("%I:%M %p")
             quote = get_current_time_quote()
 
@@ -83,16 +95,24 @@ def partial_screen_refresh():
             draw_trains(existing_draw)
 
             epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
-            logging.info("Closing connection after partial refresh")
-            epd.sleep()
 
         except IOError as e:
             logging.info(e)
-            
-        except KeyboardInterrupt:    
+
+        except KeyboardInterrupt:
             logging.info("ctrl + c:")
             epd7in5_V2.epdconfig.module_exit(cleanup=True)
             exit()
+
+        except Exception:
+            logging.exception("Unexpected error during partial screen refresh")
+
+        finally:
+            try:
+                epd.sleep()
+                logging.info("Closing connection after partial refresh")
+            except Exception:
+                logging.exception("Failed to put EPD to sleep after partial refresh")
 
 def partial_train_refresh():
     global existing_draw, existing_image
@@ -112,16 +132,24 @@ def partial_train_refresh():
             draw_trains(existing_draw)
 
             epd.display_Partial(epd.getbuffer(existing_image),0,0,epd.width,epd.height)
-            logging.info("Closing connection after partial refresh")
-            epd.sleep()
 
         except IOError as e:
             logging.info(e)
-            
-        except KeyboardInterrupt:    
+
+        except KeyboardInterrupt:
             logging.info("ctrl + c:")
             epd7in5_V2.epdconfig.module_exit(cleanup=True)
             exit()
+
+        except Exception:
+            logging.exception("Unexpected error during partial train refresh")
+
+        finally:
+            try:
+                epd.sleep()
+                logging.info("Closing connection after partial refresh")
+            except Exception:
+                logging.exception("Failed to put EPD to sleep after partial refresh")
 
 def install_signal_handlers():
     loop = asyncio.get_running_loop()

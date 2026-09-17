@@ -96,7 +96,7 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     if not uptown_trains:
         train_label = "No arriving " + train_text
         [label_w, label_h] = text_size(train_label,helvetica22)
-        draw.text((symbolX - 15, top_train_y - (top_train_y/2)),error_label,font= helvetica22, fill = 0)
+        draw.text((symbolX - 15, top_train_y - (top_train_y/2)),train_label,font= helvetica22, fill = 0)
     else:
         for i, (route, mins) in enumerate(uptown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
@@ -105,7 +105,7 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
     if not downtown_trains:
         train_label = "No arriving\n" + train_text
         [label_w, label_h] = text_size(train_label,helvetica22)
-        draw.text((symbolX + offsetX - 15, top_train_y - (top_train_y/2)),error_label,font= helvetica22, fill = 0)
+        draw.text((symbolX + offsetX - 15, top_train_y - (top_train_y/2)),train_label,font= helvetica22, fill = 0)
     else:
         for i, (route, mins) in enumerate(downtown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
