@@ -103,9 +103,9 @@ def draw_trains_for_line(arriving_trains,trains,train_count,symbolX,draw,):
                 add_train(draw,symbolX,train_y,route,mins,radius)
 
     if not downtown_trains:
-        train_label = "No arriving\n" + train_text
+        train_label = "No arriving " + train_text
         [label_w, label_h] = text_size(train_label,helvetica22)
-        draw.text((symbolX + offsetX - 15, top_train_y - (label_h/2)),train_label,font= helvetica22, fill = 0)
+        draw.text((symbolX + offsetX - 15, top_train_y),train_label,font= helvetica22, fill = 0)
     else:
         for i, (route, mins) in enumerate(downtown_trains):
                 train_y = top_train_y + (i*((2*radius) + padding))
